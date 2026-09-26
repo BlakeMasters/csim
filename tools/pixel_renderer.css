@@ -1,0 +1,54 @@
+/* Compact companion styles for tools/pixel_renderer.js. */
+.csim-pixel-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(200px, 250px);
+  gap: 7px;
+  align-items: stretch;
+}
+.csim-pixel-canvas {
+  display: block;
+  width: 100%;
+  height: 220px;
+  min-width: 0;
+  border: 3px solid #55778c;
+  border-radius: 0;
+  box-shadow: inset 0 0 0 3px #07121c, 3px 3px 0 #050e17;
+  background: #091625;
+  image-rendering: pixelated;
+  cursor: crosshair;
+  touch-action: manipulation;
+}
+.csim-pixel-canvas:focus-visible { outline: 3px solid #ffd178; outline-offset: 2px; }
+.csim-pixel-inspector {
+  min-width: 0;
+  min-height: 220px;
+  padding: 0 9px 8px;
+  color: #effaff;
+  background: #10273a;
+  border: 3px solid #55778c;
+  border-radius: 0;
+  box-shadow: inset 0 0 0 2px #07121c, 3px 3px 0 #050e17;
+  font: 11px/1.32 Consolas, "Cascadia Mono", monospace;
+}
+.csim-inspector-header { display: flex; justify-content: space-between; gap: 8px; align-items: center; margin: 0 -9px 8px; padding: 7px 9px; background: #173345; border-bottom: 3px solid #55778c; }
+.csim-inspector-header strong { font-size: 13px; overflow-wrap: anywhere; color: #69dfe5; }
+.csim-inspector-status { padding: 2px 5px; border-radius: 0; background: #284a55; color: #d6f9f6; font-size: 10px; letter-spacing: .04em; }
+.csim-inspector-status.rejected { background: #682b3a; color: #ffe5e7; }
+.csim-inspector-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.csim-inspector-table th, .csim-inspector-table td { padding: 4px 3px; border-bottom: 1px solid #315268; text-align: right; }
+.csim-inspector-table th:first-child { text-align: left; font-weight: 600; }
+.csim-inspector-table thead th { color: #ffd178; font-weight: 700; background: #173345; }
+.csim-inspector-transfer { color: #ffd178; margin: 8px 0 4px; }
+.csim-inspector-scope, .csim-inspector-empty { color: #b7d1da; margin: 6px 0 0; }
+.csim-inspector-seed, .csim-inspector-evidence { color: #69dfe5; margin: 5px 0 0; overflow-wrap: anywhere; }
+.csim-inspector-trace { color: #bbabff; margin: 5px 0 0; overflow-wrap: anywhere; }
+.csim-pixel-note { color: #b7d1da; font: 11px/1.35 Consolas, "Cascadia Mono", monospace; margin: 5px 0 0; }
+@media (max-width: 860px) {
+  .csim-pixel-layout { grid-template-columns: minmax(0, 1fr); }
+  .csim-pixel-canvas { height: 195px; }
+  .csim-pixel-inspector { min-height: 0; }
+}
+@media (max-width: 470px) { .csim-pixel-canvas { height: 180px; } }
+@media (prefers-reduced-motion: reduce) {
+  .csim-pixel-canvas, .csim-pixel-inspector { scroll-behavior: auto; transition: none; animation: none; }
+}
