@@ -321,6 +321,7 @@ class DemoSession:
             "recording_available": (OSS_CLI is not None and
                                     (ROOT / "tools/replay_interactive_trace.py").is_file()),
             "engine_recording_available": ENGINE_CLI is not None,
+            "campaign_report_available": CAMPAIGN_HTML is not None,
             "symbolic_program": {"schema_version": self.symbolic_ir["schema_version"],
                                  "kind": self.symbolic_ir["kind"],
                                  "ruleset_sha256": self.symbolic_ir["ruleset_sha256"],
@@ -749,6 +750,36 @@ PAGE = PAGE.replace("</head>", '<link rel="stylesheet" href="/pixel_renderer.css
 PAGE = PAGE.replace("</head>", '<link rel="stylesheet" href="/playground_pixel_theme.css"></head>')
 PAGE = PAGE.replace('<script src="/app.js"></script>',
                     '<script src="/pixel_renderer.js"></script><script src="/app.js"></script>')
+PAGE = PAGE.replace("</style>",
+                    ".demo-guide{border:2px solid var(--blue);background:var(--panel);border-radius:0;padding:6px 9px;margin:5px 0 2px;box-shadow:none}"
+                    ".demo-guide-top,.demo-guide-presets{display:flex;align-items:center;gap:8px;flex-wrap:wrap}"
+                    ".demo-guide-top strong{color:var(--blue);text-transform:uppercase;letter-spacing:.08em}"
+                    ".demo-guide-steps{font-size:11px;line-height:1.35;margin:3px 0;color:var(--ink)}"
+                    ".demo-guide-presets{font-size:11px}.demo-guide-presets button{padding:3px 8px}"
+                    ".demo-guide-readiness{font-size:10px;color:var(--muted);overflow-wrap:anywhere}"
+                    "@media(max-width:650px){.demo-guide-steps{font-size:10px}}</style>")
+PAGE = PAGE.replace("</header>",
+                    '<section id="live-guide" class="demo-guide" aria-label="Live demo guide">'
+                    '<div class="demo-guide-top"><strong>Live demo guide · 2-minute path</strong>'
+                    '<span id="guide-readiness" class="demo-guide-readiness" role="status"></span></div>'
+                    '<p class="demo-guide-steps">0:00 Choose 1, 3 or 5 identified cell instances sharing a field. '
+                    '0:20 Run the paired 82-step NF-κB schedule preset. '
+                    '0:40 Click a pixel cell to inspect its state. '
+                    '1:00 Browse <a href="#observed-panel">measured p65</a> and the frozen early fit. '
+                    '1:20 Open the campaign review when linked. '
+                    '1:40 Inspect <a href="#learning-section">learner iterations</a> and '
+                    '<a href="#ledger-section">Ocura OSS evidence</a>. '
+                    'Synthetic state and delivery are separate from measured reporter traces.</p>'
+                    '<div class="demo-guide-presets"><span>Reset synthetic NF-κB:</span>'
+                    '<button type="button" data-cell-preset="1">1 cell</button>'
+                    '<button type="button" data-cell-preset="3">3 cells</button>'
+                    '<button type="button" data-cell-preset="5">5 cells</button>'
+                    '<a href="http://127.0.0.1:8765/" target="_blank" rel="noopener">Agent board ↗</a>'
+                    '</div></section></header>', 1)
+PAGE = PAGE.replace("<section><h2>Proposer and learner iterations",
+                    '<section id="learning-section"><h2>Proposer and learner iterations')
+PAGE = PAGE.replace("<section><h2>Ocura OSS ledger and optional Engine",
+                    '<section id="ledger-section"><h2>Ocura OSS ledger and optional Engine')
 
 
 APP_JS = r"""
@@ -1157,7 +1188,12 @@ function renderEvidence() {
   evidenceCard(box,"Optional Engine run ID",e.engine_run_id||"not used in this run");
   $("evidence-path").textContent=e.workload_path||e.description||"";
 }
-function render() { renderState();renderTrace();renderCharts();renderComparison();renderObserved();renderSymbolic();renderLearning();renderEvidence(); }
+function renderGuide() {
+  const count=state.configuration.cell_count || 1;
+  const observedCount=observedIndex?.status==="available" ? observedIndex.conditions.length : 0;
+  $("guide-readiness").textContent=`OSS ${state.recording_available?"ready":"unavailable"} · measured overlay ${observedCount?observedCount+" conditions":"unavailable"} · campaign ${state.campaign_report_available?"linked":"unavailable"} · ${count} cell${count===1?"":"s"} · ${state.accepted_steps}/${state.configuration.horizon_steps} steps`;
+}
+function render() { renderState();renderTrace();renderCharts();renderComparison();renderObserved();renderSymbolic();renderLearning();renderEvidence();renderGuide(); }
 function message(id,text,bad=false) { const el=$(id);el.textContent=text;el.className="status-line "+(bad?"bad":"good"); }
 function numericInput(input,label,integer=false) {
   if (!input || input.value.trim()==="") throw new Error(label+" cannot be blank");
@@ -1170,7 +1206,19 @@ function redrawSceneAfterLayout(){requestAnimationFrame(()=>{if(state)renderScen
 async function load() {state=await api("/api/state");renderModes();render();redrawSceneAfterLayout();
   try{observedIndex=await api("/api/observed");if(observedIndex.status==="available")
     observedCondition=await api("/api/observed?condition_id="+observedIndex.conditions[0].condition_id);
-    renderObserved();redrawSceneAfterLayout();}catch(error){observedPanel();$("observed-note").textContent=error.message;}}
+    renderObserved();renderGuide();redrawSceneAfterLayout();}catch(error){observedPanel();$("observed-note").textContent=error.message;renderGuide();}}
+async function resetNfkbPreset(count) {
+  if (![1,3,5].includes(count)) throw new Error("cell preset must be 1, 3 or 5");
+  const configuration={...configFor("nfkb").defaults,cell_count:count};
+  state=await api("/api/reset","POST",{mode:"nfkb",configuration});
+  nfkbComparison=null;$("mode").value="nfkb";renderConfig();render();
+  message("config-error",`${count}-cell NF-κB scenario reset; run the paired preset or advance one typed interval.`);
+  message("action-status","");message("record-status","");
+}
+for(const button of document.querySelectorAll("[data-cell-preset]"))button.addEventListener("click",async()=>{
+  try{button.disabled=true;await resetNfkbPreset(Number(button.dataset.cellPreset));}
+  catch(error){message("config-error",error.message,true);}finally{button.disabled=false;}
+});
 $("mode").addEventListener("change",renderConfig);
 $("reset").addEventListener("click",async()=>{try{const mode=$("mode").value,config={};for(const input of $("config").querySelectorAll("input"))config[input.dataset.key]=numericInput(input,input.dataset.key,["horizon_steps","cell_count"].includes(input.dataset.key));
   state=await api("/api/reset","POST",{mode,configuration:config});nfkbComparison=null;message("config-error","Scenario reset and ready.");message("action-status","");message("record-status","");renderConfig();render();}catch(error){message("config-error",error.message,true);}});

@@ -166,6 +166,20 @@ class InteractiveDemoTests(unittest.TestCase):
         # First draw can size the canvas before its external stylesheet applies.
         self.assertIn("requestAnimationFrame(()=>{if(state)renderScene();})", demo.APP_JS)
 
+    def test_live_guide_has_nfkb_cell_presets_and_actual_readiness(self):
+        page = demo.PAGE
+        self.assertIn('id="live-guide"', page)
+        self.assertIn("2-minute path", page)
+        self.assertIn('href="http://127.0.0.1:8765/"', page)
+        for count in (1, 3, 5):
+            self.assertIn(f'data-cell-preset="{count}"', page)
+            session = demo.DemoSession(None)
+            config = dict(demo.MODES["nfkb"].defaults, cell_count=count)
+            state = session.reset({"mode": "nfkb", "configuration": config})
+            self.assertEqual(len(state["observation"]["cells"]), count)
+        self.assertIn("campaign_report_available", session.snapshot())
+        self.assertIn('"/api/reset","POST"', demo.APP_JS)
+
     def test_campaign_route_serves_only_configured_read_only_html(self):
         with tempfile.TemporaryDirectory() as scratch:
             report = Path(scratch) / "index.html"
