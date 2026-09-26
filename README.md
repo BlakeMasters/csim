@@ -16,6 +16,12 @@ foundation; its evidence does not establish a validated tumor simulator.
 
 ## Start here
 
+- **Launch the local demo:** from the repository root in PowerShell, run
+  `./DEMO-HERE.ps1` (or `./DEMO-HERE.ps1 -Install` to create the pinned Python
+  environment first). The script prints the board, playground, and campaign URLs.
+  Use `./DEMO-HERE.ps1 -CheckOnly` to inspect prerequisites without serving.
+  The observed data and preserved run artifacts are local inputs; see the
+  [live demo runbook](docs/LIVE_DEMO_RUNBOOK.md) for their provenance and paths.
 - **[Live demo runbook](docs/LIVE_DEMO_RUNBOOK.md):** preflight and launch the
   local work board, virtual-cell playground and preserved campaign review.
 - **[Project direction](docs/PROJECT_DIRECTION.md):** the intended platform,
