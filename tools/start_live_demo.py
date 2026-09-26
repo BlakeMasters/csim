@@ -137,6 +137,7 @@ def probe(port: int, kind: str, expected_report_sha256: str) -> str:
             state = json.load(urllib.request.urlopen(base + "/api/state", timeout=2))
             campaign = urllib.request.urlopen(base + "/campaign", timeout=2).read(20_000_001)
             valid = (state.get("status") == "ok" and state.get("recording_available") is True
+                     and state.get("coupled_arena_available") is True
                      and hashlib.sha256(campaign).hexdigest() == expected_report_sha256)
         if valid:
             return "reused"
@@ -222,7 +223,8 @@ def main() -> int:
             ("board", args.board_port, [sys.executable, "tools/agent_dashboard.py", "--port", str(args.board_port)]),
             ("playground", args.playground_port,
              [sys.executable, "tools/run_interactive_demo.py", "--port", str(args.playground_port),
-              "--run", str(run), "--oss-cli", str(oss), "--campaign-report", str(report)]
+              "--run", str(run), "--oss-cli", str(oss), "--campaign-report", str(report),
+              "--coupled-arena-result", str(DEFAULT_COUPLED)]
              + ["--board-url", urls["board"]]
              + (["--engine-cli", str(engine)] if engine else [])),
         ):

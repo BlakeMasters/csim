@@ -33,7 +33,9 @@ at `runs/coupled_nfkb_arena_20260926_04/` and its OSS sidecar. It checks that
 the compact report receipt
 matches that exact campaign and selects
 `runs/nfkb_campaign_review_20260926_04/index.html` for the read-only
-`/campaign` route. These local `runs/` and `data/` inputs are not bundled in
+`/campaign` route. It passes the verified corrected coupled result to the
+playground through `--coupled-arena-result`, so a reused playground must report
+that panel available. These local `runs/` and `data/` inputs are not bundled in
 the tracked package; restore them before launching on another checkout. The
 exact paths and hashes are saved in the new `runs/live_demo_*/launch.json`.
 
@@ -45,7 +47,9 @@ without Engine.
 ## Two-minute click path
 
 1. In the playground, use **3 cells** under **Reset synthetic NF-κB**, then
-   **Run 82-step NF-κB pair preset**. Click a pixel cell to inspect its
+   **Run 82-step NF-κB pair preset** to compare two separate completed runs.
+   That comparison does not advance the live pixel scene. Press **Step** once
+   to advance the current live episode, then click a pixel cell to inspect its
    reporter, feedback, inventory and shared-field state.
 2. Scroll to **Measured NF-κB reporter and frozen proxy fit**. Select a
    condition, inspect the observed source rows and descriptive band, and open
@@ -95,7 +99,7 @@ the local CPU, and makes no cloud request.
 
 ## Evidence and scope
 
-The alternate-port smoke at `runs/live_demo_smoke_20260926_03/launch.json`
+The alternate-port smoke at `runs/live_demo_smoke_20260926_04/launch.json`
 started both services on `:8875`/`:8876`, checked the board, playground
 state and byte-exact campaign SHA-256
 `79bc441a8daae16be97b5cd0c9155f0abeedc735a9be1f8600b790daee9d05f6`,

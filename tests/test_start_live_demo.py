@@ -15,7 +15,8 @@ class _KnownHandler(BaseHTTPRequestHandler):
         if self.path == "/":
             body = b"<h1>Agent work board</h1><h2>Completed activity</h2>"
         elif self.path == "/api/state":
-            body = json.dumps({"status": "ok", "recording_available": True}).encode()
+            body = json.dumps({"status": "ok", "recording_available": True,
+                               "coupled_arena_available": True}).encode()
         elif self.path == "/campaign":
             body = b"<html>campaign</html>"
         else:
