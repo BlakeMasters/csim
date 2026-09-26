@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 import sys
 import unittest
@@ -9,7 +10,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / "src"), str(ROOT / "tools")]
 
-from cellsim_v2.checkpoint import encode_world  # noqa: E402
+from cellsim_v2.checkpoint import canonical_bytes, encode_world  # noqa: E402
 from cellsim_v2.coupled_nfkb_arena import (  # noqa: E402
     CoupledNfkbArena, CoupledRejected, MEDIATOR,
     mediator_clearance_update, mediator_secretion_update,
@@ -105,6 +106,14 @@ class CoupledArenaTests(unittest.TestCase):
         self.assertEqual(demo["cases"]["baseline"]["accepted_steps"], 82)
         self.assertTrue(demo["checkpoint_replay_equal"])
         self.assertTrue(demo["overdraw_rejection"]["unchanged"])
+
+    def test_checkpoint_rejects_wrapper_seed_mismatch(self):
+        arena = CoupledNfkbArena(cell_count=3, seed=7)
+        forged = json.loads(json.dumps(arena.checkpoint()))
+        forged["payload"]["configuration"]["seed"] = 17
+        forged["sha256"] = hashlib.sha256(canonical_bytes(forged["payload"])).hexdigest()
+        with self.assertRaisesRegex(ValueError, "seed"):
+            CoupledNfkbArena.from_checkpoint(forged)
 
 
 if __name__ == "__main__":

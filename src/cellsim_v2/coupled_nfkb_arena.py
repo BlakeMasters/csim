@@ -338,6 +338,12 @@ class CoupledNfkbArena:
         core = (NfkbEpisode.from_checkpoint(payload["core_checkpoint"])
                 if config["seed"] is None else
                 SeededNfkbEpisode.from_checkpoint(payload["core_checkpoint"]))
+        if config["seed"] is not None and core._seed != config["seed"]:
+            raise ValueError("coupled checkpoint seed identity mismatch")
+        core_config = core._config if config["seed"] is None else core._core._config
+        if any(core_config[key] != config[key]
+               for key in ("cell_count", "horizon_steps", "step_min")):
+            raise ValueError("coupled checkpoint core configuration mismatch")
         steps = payload["accepted_steps"]
         if (type(steps) is not int or not 0 <= steps <= config["horizon_steps"] or
                 core.observe()["time_min"] != steps * config["step_min"]):
