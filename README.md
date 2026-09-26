@@ -39,6 +39,13 @@ foundation; its evidence does not establish a validated tumor simulator.
 - **[Work board](.agents/BOARD.md):** assignments, status, and evidence IDs for
   work coordinated in this checkout.
 
+## Local agent dashboard
+
+Run `python tools/agent_dashboard.py` and open <http://127.0.0.1:8765/>. The
+read-only page renders `.agents/BOARD.md` and refreshes every 15 seconds. Edit
+the board to change assignments or statuses. It shows recorded work, not live
+agent presence, and uses only Python's standard library on localhost.
+
 ## Run the current groundwork
 
 From this directory, use Python and its standard library:
