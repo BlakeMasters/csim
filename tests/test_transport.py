@@ -76,6 +76,39 @@ class GridTests(unittest.TestCase):
 
 
 class DiffusionTests(unittest.TestCase):
+    def test_closed_diffusion_preserves_scaled_amounts_and_concentration_bounds(self):
+        # Fixed dimensionless case: scaling all lengths by L and D by L^2
+        # leaves the Euler concentration update at the same dt unchanged.
+        reference = None
+        for length_scale in (1e-3, 1., 1e3):
+            widths = tuple(length_scale * value for value in (1., 2., 0.75))
+            grid = RectilinearGrid3D(widths, (1.5 * length_scale, 0.5 * length_scale),
+                                     (0.8 * length_scale, 1.2 * length_scale))
+            diffusivity = 0.1 * length_scale**2
+            dt = 0.2 * diffusion_timestep_limit_s(grid, diffusivity)
+            for concentration_scale in (1e-18, 1., 1e18):
+                with self.subTest(length_scale=length_scale,
+                                  concentration_scale=concentration_scale):
+                    initial = tuple(concentration_scale * (1. + (7 * i % 11) / 10.)
+                                    for i in range(grid.voxel_count))
+                    world = world_for(grid, initial)
+                    before = world.clone()
+                    proposal = diffusion_step(world, grid, "tracer", diffusivity, dt)
+                    self.assertEqual(world, before)
+                    self.assertEqual(proposal.ledger, ())
+                    proposal.commit(world, ALL)
+                    after = world.fields["tracer"].concentrations_mol_m3
+                    normalized = tuple(value / concentration_scale for value in after)
+                    if reference is None:
+                        reference = normalized
+                    for actual, expected in zip(normalized, reference):
+                        self.assertTrue(math.isclose(actual, expected, rel_tol=2e-14))
+                    self.assertGreaterEqual(min(normalized), min(initial) / concentration_scale - 2e-14)
+                    self.assertLessEqual(max(normalized), max(initial) / concentration_scale + 2e-14)
+                    self.assertTrue(math.isclose(total_amount(world, "tracer"),
+                                                  total_amount(before, "tracer"),
+                                                  rel_tol=2e-14, abs_tol=0.))
+
     def test_unequal_voxel_face_amount_is_paired(self):
         grid = RectilinearGrid3D((1, 3), (2,), (4,))
         world = world_for(grid, (1, 0))
@@ -162,6 +195,49 @@ class DiffusionTests(unittest.TestCase):
         self.assertAlmostEqual(world.ledger[0].change_mol, 9)
         self.assertEqual(world.fields["tracer"].amounts_mol[grid.flat_index(0, 0, 0)], 0)
         self.assertAlmostEqual(world.fields["tracer"].amounts_mol[grid.flat_index(1, 1, 1)], 3)
+
+    def test_six_boundary_faces_account_once_at_edges_and_corners(self):
+        grid = RectilinearGrid3D((1., 2., 1.5), (1., 0.5, 2.), (2., 1., 0.75))
+        fluxes = tuple(BoundaryFlux(axis, side, 0.1 * (1 + 2 * axis + (side == "upper")))
+                       for axis in range(3) for side in ("lower", "upper"))
+        dt = 0.25
+        first = world_for(grid, (0.,) * grid.voxel_count)
+        reverse = first.clone()
+        proposal = diffusion_step(first, grid, "tracer", 0., dt, fluxes)
+        self.assertEqual(total_amount(first, "tracer"), 0.)
+        proposal.commit(first, ALL)
+        diffusion_step(reverse, grid, "tracer", 0., dt, reversed(fluxes)).commit(reverse, ALL)
+        self.assertEqual(first, reverse)
+        self.assertEqual(len(first.ledger), 6)
+        expected = []
+        for voxel in range(grid.voxel_count):
+            indices = grid.indices(voxel)
+            widths = (grid.x_widths_m[indices[0]], grid.y_widths_m[indices[1]],
+                      grid.z_widths_m[indices[2]])
+            integrated = [flux.inward_mol_m2_s * grid.volumes_m3[voxel] / widths[flux.axis] * dt
+                          for flux in fluxes
+                          if indices[flux.axis] == (0 if flux.side == "lower"
+                                                    else grid.shape[flux.axis] - 1)]
+            expected.append(math.fsum(integrated))
+        self.assertEqual(expected[grid.flat_index(1, 1, 1)], 0.)
+        for actual, amount in zip(first.fields["tracer"].amounts_mol, expected):
+            self.assertTrue(math.isclose(actual, amount, rel_tol=2e-15,
+                                         abs_tol=1e-15))
+        expected_total = math.fsum(expected)
+        self.assertTrue(math.isclose(total_amount(first, "tracer"), expected_total,
+                                      rel_tol=2e-15))
+        self.assertTrue(math.isclose(math.fsum(entry.change_mol for entry in first.ledger),
+                                      expected_total, rel_tol=2e-15))
+
+    def test_late_boundary_overflow_rejects_entire_proposal(self):
+        grid = RectilinearGrid3D((1., 1.), (2.,), (1.,))
+        world = world_for(grid, (1., 0.))
+        before = world.clone()
+        with self.assertRaisesRegex(ValueError, "integrated boundary amount"):
+            diffusion_step(world, grid, "tracer", 0., 2.,
+                           (BoundaryFlux(0, "lower", 0.125),
+                            BoundaryFlux(0, "upper", 1e308)))
+        self.assertEqual(world, before)
 
     def test_each_exterior_face_uses_its_area(self):
         grid = RectilinearGrid3D((2,), (3,), (5,))
