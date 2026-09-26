@@ -16,6 +16,8 @@ foundation; its evidence does not establish a validated tumor simulator.
 
 ## Start here
 
+- **[Live demo runbook](docs/LIVE_DEMO_RUNBOOK.md):** preflight and launch the
+  local work board, virtual-cell playground and preserved campaign review.
 - **[Project direction](docs/PROJECT_DIRECTION.md):** the intended platform,
   current capabilities, and the next milestones.
 - **[Cell-model RL environments](docs/CELL_MODEL_RL_ENVIRONMENTS.md):** proposed
