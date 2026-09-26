@@ -19,6 +19,13 @@ accepts `-CheckOnly`, `-BoardPort`, `-PlaygroundPort`, and an optional
 `-EngineCli` path. It calls `tools/start_live_demo.py`; the direct commands below
 remain available when more control is useful.
 
+On macOS, use `bash DEMO-HERE.sh --install` for the first run, then
+`bash DEMO-HERE.sh`. The shell entrypoint accepts `--check-only`,
+`--board-port`, `--playground-port`, and `--engine-cli`. The launcher selects
+`.venv/bin/ocura-oss` on macOS. This path has not been exercised on a macOS
+machine; the preserved `data/` and `runs/` inputs must be copied into the
+checkout before preflight can pass.
+
 To check the exact preserved local inputs and ports without serving:
 
 ```powershell

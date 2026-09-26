@@ -20,6 +20,7 @@ foundation; its evidence does not establish a validated tumor simulator.
   `./DEMO-HERE.ps1` (or `./DEMO-HERE.ps1 -Install` to create the pinned Python
   environment first). The script prints the board, playground, and campaign URLs.
   Use `./DEMO-HERE.ps1 -CheckOnly` to inspect prerequisites without serving.
+  On macOS, use `bash DEMO-HERE.sh --install` once, then `bash DEMO-HERE.sh`.
   The observed data and preserved run artifacts are local inputs; see the
   [live demo runbook](docs/LIVE_DEMO_RUNBOOK.md) for their provenance and paths.
 - **[Live demo runbook](docs/LIVE_DEMO_RUNBOOK.md):** preflight and launch the

@@ -23,6 +23,7 @@ DEFAULT_CAMPAIGN = ROOT / "runs/nfkb_campaign_20260926_02/results.json"
 DEFAULT_COUPLED = ROOT / "runs/coupled_nfkb_arena_20260926_04/results.json"
 DEFAULT_REPORT = ROOT / "runs/nfkb_campaign_review_20260926_04/index.html"
 DEFAULT_RUN = ROOT / "runs/integrated_demo_oss_20260926T2119Z/workload/results.json"
+DEFAULT_OSS_CLI = ROOT / (".venv/Scripts/ocura-oss.exe" if os.name == "nt" else ".venv/bin/ocura-oss")
 
 
 def _sha(path: Path) -> str:
@@ -185,7 +186,7 @@ def main() -> int:
     parser.add_argument("--playground-port", type=int, default=8766)
     parser.add_argument("--campaign-report", type=Path, default=DEFAULT_REPORT)
     parser.add_argument("--run", type=Path, default=DEFAULT_RUN)
-    parser.add_argument("--oss-cli", type=Path, default=ROOT / ".venv/Scripts/ocura-oss.exe")
+    parser.add_argument("--oss-cli", type=Path, default=DEFAULT_OSS_CLI)
     parser.add_argument("--engine-cli", type=Path, help="optional installed local Engine CLI")
     parser.add_argument("--output", type=Path, help="new run directory; default uses UTC time and launcher PID")
     args = parser.parse_args()
