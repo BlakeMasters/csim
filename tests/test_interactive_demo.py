@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import hashlib
 import os
+import re
 from pathlib import Path
 import tempfile
 import threading
@@ -137,6 +138,28 @@ class InteractiveDemoTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "permutation"):
                 demo._nfkb_compare(bad)
 
+    def test_nfkb_one_click_pair_preset_completes_for_one_three_five_cells(self):
+        match = re.search(r'\["payload_uptake_rate_mol_min","Per-cell payload uptake \(mol/min\)",([0-9.]+),"number"\]', demo.APP_JS)
+        self.assertIsNotNone(match, "pair preset uptake rate must remain inspectable")
+        rate = float(match.group(1))
+        for count in (1, 3, 5):
+            with self.subTest(cell_count=count), tempfile.TemporaryDirectory() as scratch:
+                root = Path(scratch)
+                (root / "runs").mkdir()
+                session = demo.DemoSession(None)
+                session.reset({"mode": "nfkb", "configuration":
+                               dict(demo.MODES["nfkb"].defaults, cell_count=count)})
+                request = {"sequence_key": "TIPL", "stimulus_admin_mol_per_switch": 0.1,
+                           "payload_start_min": 120.0, "payload_admin_mol_at_start": 0.02,
+                           "payload_uptake_rate_mol_min": rate}
+                with patch.object(demo, "SESSION", session), patch.object(demo, "ROOT", root):
+                    result = demo._nfkb_compare(request)
+                self.assertEqual(result["status"], "pass")
+                self.assertEqual(len(result["arms"]["stimulus_only"]["observations"]), 83)
+                self.assertEqual(len(result["arms"]["stimulus_plus_generic_payload"]["observations"]), 83)
+                self.assertLessEqual(max(arm["maximum_amount_residual_mol"]
+                                         for arm in result["arms"].values()), 1e-12)
+
     def test_frozen_predictor_is_read_only_and_matches_stored_condition(self):
         path = demo.ROOT / "runs/nfkb_model_20260926_02/frozen_candidate.json"
         candidate = json.loads(path.read_text(encoding="utf-8"))
@@ -179,6 +202,17 @@ class InteractiveDemoTests(unittest.TestCase):
             self.assertEqual(len(state["observation"]["cells"]), count)
         self.assertIn("campaign_report_available", session.snapshot())
         self.assertIn('"/api/reset","POST"', demo.APP_JS)
+
+    def test_board_link_accepts_only_explicit_loopback_port(self):
+        with patch.object(demo, "BOARD_URL", "http://127.0.0.1:8875/", create=True):
+            self.assertIn(b'href="http://127.0.0.1:8875/"', demo._page_html())
+        self.assertEqual(demo._validate_board_url("http://localhost:8875/"),
+                         "http://localhost:8875/")
+        for bad in ("https://example.org/", "http://localhost:8875/other",
+                    "http://localhost:8875/?file=secret", "http://user@localhost:8875/",
+                    "http://0.0.0.0:8875/", "http://localhost/"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                demo._validate_board_url(bad)
 
     def test_campaign_route_serves_only_configured_read_only_html(self):
         with tempfile.TemporaryDirectory() as scratch:

@@ -467,17 +467,33 @@ OBSERVED: dict | None = None
 RESIDUAL: dict | None = None
 FROZEN: dict | None = None
 CAMPAIGN_HTML: bytes | None = None
+BOARD_URL = "http://127.0.0.1:8765/"
 PORT = 8766
 
 
+def _validate_board_url(value: str) -> str:
+    try:
+        parsed = urlsplit(value)
+        port = parsed.port
+    except ValueError as exc:
+        raise ValueError("--board-url must be loopback HTTP with an explicit port") from exc
+    if (parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1", "localhost"}
+            or port is None or not 1 <= port <= 65535
+            or parsed.username is not None or parsed.password is not None
+            or parsed.path not in {"", "/"} or parsed.query or parsed.fragment):
+        raise ValueError("--board-url must be loopback HTTP with an explicit port and root path")
+    return f"http://{parsed.hostname}:{port}/"
+
+
 def _page_html() -> bytes:
+    page = PAGE.replace('href="http://127.0.0.1:8765/"', f'href="{BOARD_URL}"')
     if CAMPAIGN_HTML is None:
-        return PAGE.encode("utf-8")
+        return page.encode("utf-8")
     link = ('<nav aria-label="Campaign review" class="campaign-link">'
             '<a href="/campaign">Open the read-only NF-κB campaign review ↗</a>'
             '<span>Preserved local report with its input, result, and OSS receipt provenance.</span>'
             '</nav>')
-    return PAGE.replace("</header>", link + "</header>", 1).encode("utf-8")
+    return page.replace("</header>", link + "</header>", 1).encode("utf-8")
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -823,7 +839,11 @@ function renderConfig() {
   renderActions();
   let quick=$("quick-nfkb");if(!quick){quick=node("button","▶ Run 82-step NF-κB pair preset","primary");
     quick.id="quick-nfkb";$("reset").after(quick);
-    quick.addEventListener("click",()=>{const target=$("nfkb-comparison");if(target){target.scrollIntoView({behavior:"smooth",block:"start"});$("run-nfkb-compare").click();}});}
+    quick.addEventListener("click",()=>{const target=$("nfkb-comparison");if(target){
+      const preset={sequence_key:"TIPL",stimulus_admin_mol_per_switch:0.1,payload_start_min:120,
+        payload_admin_mol_at_start:0.02,payload_uptake_rate_mol_min:0.00001};
+      for(const input of target.querySelectorAll("[data-compare-key]"))input.value=String(preset[input.dataset.compareKey]);
+      target.scrollIntoView({behavior:"smooth",block:"start"});$("run-nfkb-compare").click();}});}
   quick.hidden=$("mode").value!=="nfkb";quick.disabled=$("mode").value!==state.mode;
 }
 function renderActions() {
@@ -1030,7 +1050,7 @@ function comparisonPanel() {
     ["stimulus_admin_mol_per_switch","Stimulus amount per switch (mol)",0.1,"number"],
     ["payload_start_min","Payload start (min, 6-minute grid)",120,"number"],
     ["payload_admin_mol_at_start","Generic payload amount (mol)",0.02,"number"],
-    ["payload_uptake_rate_mol_min","Per-cell payload uptake (mol/min)",0.001,"number"]]){
+    ["payload_uptake_rate_mol_min","Per-cell payload uptake (mol/min)",0.00001,"number"]]){
     const row=node("label",label),input=node("input");input.type=type;input.value=String(value);input.dataset.compareKey=key;
     if(type==="number"){input.min="0";input.step="any";}row.append(input);controls.append(row);}
   panel.append(controls);const action=node("button","Run paired schedule","primary");action.id="run-nfkb-compare";panel.append(action);
@@ -1250,6 +1270,7 @@ load().catch(error=>message("config-error",error.message,true));
 
 
 def main() -> int:
+    global SESSION, ENGINE_CLI, OSS_CLI, RUN_PYTHON, OBSERVED, RESIDUAL, FROZEN, CAMPAIGN_HTML, BOARD_URL, PORT
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", type=int, default=8766, help="loopback port, default 8766")
     parser.add_argument("--run", type=Path, help="specific integrated run directory or result/receipt JSON")
@@ -1259,11 +1280,17 @@ def main() -> int:
                         help="fixed installed Ocura Engine CLI for optional one-click ledger replay")
     parser.add_argument("--campaign-report", type=Path,
                         help="existing standalone HTML report to serve read-only at /campaign")
+    parser.add_argument("--board-url", default=BOARD_URL,
+                        help="loopback agent board root URL; default http://127.0.0.1:8765/")
     args = parser.parse_args()
     if not 1024 <= args.port <= 65535:
         parser.error("port must be 1024–65535")
     if args.engine_cli is not None and not args.engine_cli.resolve().is_file():
         parser.error("--engine-cli must name an existing file")
+    try:
+        board_url = _validate_board_url(args.board_url)
+    except ValueError as exc:
+        parser.error(str(exc))
     campaign_bytes = None
     if args.campaign_report is not None:
         campaign_path = args.campaign_report.resolve()
@@ -1285,12 +1312,12 @@ def main() -> int:
         parser.error("Ocura OSS is required: initialize the local .venv, install ocura-oss on PATH, or pass --oss-cli")
     python_candidates = [ROOT / ".venv/Scripts/python.exe", ROOT / ".venv/bin/python", Path(sys.executable)]
     run_python = next(path.resolve() for path in python_candidates if path.is_file())
-    global SESSION, ENGINE_CLI, OSS_CLI, RUN_PYTHON, OBSERVED, RESIDUAL, FROZEN, CAMPAIGN_HTML, PORT
     PORT = args.port
     ENGINE_CLI = args.engine_cli.resolve() if args.engine_cli is not None else None
     OSS_CLI = oss_selected
     RUN_PYTHON = run_python
     CAMPAIGN_HTML = campaign_bytes
+    BOARD_URL = board_url
     OBSERVED = _observed_artifact()
     frozen_path = ROOT / "runs/nfkb_model_20260926_02/frozen_candidate.json"
     frozen_candidate = _read_json(frozen_path)
