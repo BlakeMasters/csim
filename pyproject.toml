@@ -7,7 +7,7 @@ name = "cellsim-reference-build-v2"
 version = "0.2.0"
 description = "Evidence-scoped cellular simulation build plan and small reference kernels"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = ["ocura-oss==0.4.0"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
