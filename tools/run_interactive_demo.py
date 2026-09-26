@@ -465,7 +465,18 @@ RUN_PYTHON: Path | None = None
 OBSERVED: dict | None = None
 RESIDUAL: dict | None = None
 FROZEN: dict | None = None
+CAMPAIGN_HTML: bytes | None = None
 PORT = 8766
+
+
+def _page_html() -> bytes:
+    if CAMPAIGN_HTML is None:
+        return PAGE.encode("utf-8")
+    link = ('<nav aria-label="Campaign review" class="campaign-link">'
+            '<a href="/campaign">Open the read-only NF-κB campaign review ↗</a>'
+            '<span>Preserved local report with its input, result, and OSS receipt provenance.</span>'
+            '</nav>')
+    return PAGE.replace("</header>", link + "</header>", 1).encode("utf-8")
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -478,12 +489,15 @@ class Handler(BaseHTTPRequestHandler):
         return host in allowed and (origin is None or origin in {f"http://{item}" for item in allowed})
 
     def _send(self, status: int, payload: bytes, content_type: str,
-              *, attachment: str | None = None) -> None:
+              *, attachment: str | None = None,
+              content_security_policy: str | None = None) -> None:
         self.send_response(status)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(payload)))
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
+        if content_security_policy is not None:
+            self.send_header("Content-Security-Policy", content_security_policy)
         if attachment is not None:
             self.send_header("Content-Disposition", f'attachment; filename="{attachment}"')
         self.end_headers()
@@ -513,7 +527,12 @@ class Handler(BaseHTTPRequestHandler):
         try:
             parsed = urlsplit(self.path)
             if parsed.path == "/" and not parsed.query:
-                self._send(200, PAGE.encode("utf-8"), "text/html; charset=utf-8")
+                self._send(200, _page_html(), "text/html; charset=utf-8")
+            elif parsed.path == "/campaign" and not parsed.query and CAMPAIGN_HTML is not None:
+                self._send(200, CAMPAIGN_HTML, "text/html; charset=utf-8",
+                           content_security_policy="default-src 'none'; script-src 'none'; "
+                           "style-src 'unsafe-inline'; img-src data:; base-uri 'none'; "
+                           "form-action 'none'; frame-ancestors 'none'")
             elif parsed.path == "/app.js" and not parsed.query:
                 self._send(200, APP_JS.encode("utf-8"), "text/javascript; charset=utf-8")
             elif parsed.path == "/pixel_renderer.js" and not parsed.query:
@@ -719,6 +738,8 @@ PAGE = PAGE.replace("</style>",
 PAGE = PAGE.replace("style-src 'unsafe-inline'", "style-src 'self' 'unsafe-inline'")
 PAGE = PAGE.replace("</style>",
                     ".csim-inspector-table{min-width:0}.csim-inspector-table{table-layout:fixed}#cell-inspector{overflow:hidden}</style>")
+PAGE = PAGE.replace("</style>",
+                    ".campaign-link{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:6px 0 0;padding:5px 8px;border-left:3px solid var(--yellow);background:var(--panel)}.campaign-link a{font-weight:800}.campaign-link span{color:var(--muted);font-size:.78rem}</style>")
 PAGE = PAGE.replace('<button id="record">Record through Engine + OSS</button>',
                     '<button id="record">Record through Ocura OSS</button><button id="record-engine">Optional Engine + OSS</button>')
 PAGE = PAGE.replace("The ledger button replays a complete uptake episode through a fixed local command. Engine and OSS IDs are execution evidence, separate from simulation results.",
@@ -1188,11 +1209,25 @@ def main() -> int:
                         help="required Ocura OSS CLI; defaults to project .venv, then PATH")
     parser.add_argument("--engine-cli", type=Path,
                         help="fixed installed Ocura Engine CLI for optional one-click ledger replay")
+    parser.add_argument("--campaign-report", type=Path,
+                        help="existing standalone HTML report to serve read-only at /campaign")
     args = parser.parse_args()
     if not 1024 <= args.port <= 65535:
         parser.error("port must be 1024–65535")
     if args.engine_cli is not None and not args.engine_cli.resolve().is_file():
         parser.error("--engine-cli must name an existing file")
+    campaign_bytes = None
+    if args.campaign_report is not None:
+        campaign_path = args.campaign_report.resolve()
+        if not campaign_path.is_file() or campaign_path.suffix.lower() not in {".html", ".htm"}:
+            parser.error("--campaign-report must name one existing HTML file")
+        if campaign_path.stat().st_size > 20_000_000:
+            parser.error("--campaign-report must be at most 20 MB")
+        try:
+            campaign_bytes = campaign_path.read_bytes()
+            campaign_bytes.decode("utf-8")
+        except (OSError, UnicodeDecodeError) as exc:
+            parser.error(f"--campaign-report must be readable UTF-8 HTML: {exc}")
     oss_candidates = ([args.oss_cli] if args.oss_cli is not None else
                       [ROOT / ".venv/Scripts/ocura-oss.exe", ROOT / ".venv/bin/ocura-oss",
                        Path(shutil.which("ocura-oss")) if shutil.which("ocura-oss") else None])
@@ -1202,11 +1237,12 @@ def main() -> int:
         parser.error("Ocura OSS is required: initialize the local .venv, install ocura-oss on PATH, or pass --oss-cli")
     python_candidates = [ROOT / ".venv/Scripts/python.exe", ROOT / ".venv/bin/python", Path(sys.executable)]
     run_python = next(path.resolve() for path in python_candidates if path.is_file())
-    global SESSION, ENGINE_CLI, OSS_CLI, RUN_PYTHON, OBSERVED, RESIDUAL, FROZEN, PORT
+    global SESSION, ENGINE_CLI, OSS_CLI, RUN_PYTHON, OBSERVED, RESIDUAL, FROZEN, CAMPAIGN_HTML, PORT
     PORT = args.port
     ENGINE_CLI = args.engine_cli.resolve() if args.engine_cli is not None else None
     OSS_CLI = oss_selected
     RUN_PYTHON = run_python
+    CAMPAIGN_HTML = campaign_bytes
     OBSERVED = _observed_artifact()
     frozen_path = ROOT / "runs/nfkb_model_20260926_02/frozen_candidate.json"
     frozen_candidate = _read_json(frozen_path)
@@ -1226,7 +1262,8 @@ def main() -> int:
     server = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
     print(json.dumps({"status": "ready", "url": f"http://127.0.0.1:{PORT}/",
                       "modes": list(MODES), "oss_recording_available": True,
-                      "engine_recording_available": ENGINE_CLI is not None}),
+                      "engine_recording_available": ENGINE_CLI is not None,
+                      "campaign_report_available": CAMPAIGN_HTML is not None}),
           flush=True)
     try:
         server.serve_forever(poll_interval=0.2)

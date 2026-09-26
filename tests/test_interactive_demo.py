@@ -6,8 +6,13 @@ import hashlib
 import os
 from pathlib import Path
 import tempfile
+import threading
 import unittest
 from unittest.mock import patch
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
+
+from http.server import ThreadingHTTPServer
 
 import run_interactive_demo as demo
 
@@ -160,6 +165,47 @@ class InteractiveDemoTests(unittest.TestCase):
     def test_initial_scene_redraws_after_layout_is_ready(self):
         # First draw can size the canvas before its external stylesheet applies.
         self.assertIn("requestAnimationFrame(()=>{if(state)renderScene();})", demo.APP_JS)
+
+    def test_campaign_route_serves_only_configured_read_only_html(self):
+        with tempfile.TemporaryDirectory() as scratch:
+            report = Path(scratch) / "index.html"
+            report.write_bytes(b"<!doctype html><title>review</title>")
+            secret = Path(scratch) / "secret.txt"
+            secret.write_text("private", encoding="utf-8")
+            server = ThreadingHTTPServer(("127.0.0.1", 0), demo.Handler)
+            worker = threading.Thread(target=server.serve_forever, daemon=True)
+            worker.start()
+            try:
+                base = f"http://127.0.0.1:{server.server_port}"
+                with patch.object(demo, "PORT", server.server_port), \
+                     patch.object(demo, "CAMPAIGN_HTML", report.read_bytes(), create=True):
+                    with urlopen(base + "/") as response:
+                        self.assertIn(b'href="/campaign"', response.read())
+                    with urlopen(base + "/campaign") as response:
+                        self.assertEqual(response.read(), report.read_bytes())
+                        self.assertEqual(response.headers["Content-Type"],
+                                         "text/html; charset=utf-8")
+                        self.assertIn("script-src 'none'",
+                                      response.headers["Content-Security-Policy"])
+                    for path in ("/campaign?file=secret.txt", "/campaign/../secret.txt"):
+                        with self.subTest(path=path), self.assertRaises(HTTPError) as error:
+                            urlopen(base + path)
+                        self.assertEqual(error.exception.code, 404)
+                    with self.assertRaises(HTTPError) as denied:
+                        urlopen(Request(base + "/campaign",
+                                        headers={"Origin": "http://example.org"}))
+                    self.assertEqual(denied.exception.code, 403)
+                with patch.object(demo, "PORT", server.server_port), \
+                     patch.object(demo, "CAMPAIGN_HTML", None, create=True):
+                    with urlopen(base + "/") as response:
+                        self.assertNotIn(b'href="/campaign"', response.read())
+                    with self.assertRaises(HTTPError) as missing:
+                        urlopen(base + "/campaign")
+                    self.assertEqual(missing.exception.code, 404)
+            finally:
+                server.shutdown()
+                server.server_close()
+                worker.join(timeout=2)
 
 
 if __name__ == "__main__":
