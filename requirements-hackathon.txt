@@ -1,5 +1,6 @@
 # Tested on Windows 11 with CPython 3.12.6 on 2026-09-26.
-# Optional data inspection and local run ledger; the reference core remains dependency-free.
+# Shared demo environment: Ocura OSS is required; scientific readers use tested pins.
+# Source-checkout numerical kernels remain importable without installing this project.
 numpy==2.2.6
 scipy==1.14.1
 openpyxl==3.1.5

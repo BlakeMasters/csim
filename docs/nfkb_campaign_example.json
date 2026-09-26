@@ -1,0 +1,29 @@
+{
+  "format": "cellsim-nfkb-campaign/1",
+  "campaign_id": "local-nfkb-payload-matrix-20260926",
+  "sequence_key": "TIPL",
+  "cell_counts": [1, 2, 3, 4, 5],
+  "stimulus_admin_mol_per_switch": 0.125,
+  "initial_stimulus_reservoir_mol": 0.5,
+  "initial_payload_reservoir_mol": 0.1,
+  "amount_balance_limit_mol": 1e-12,
+  "protocols": [
+    {
+      "id": "payload-120m-002mol",
+      "payload_start_min": 120,
+      "payload_amount_mol": 0.02,
+      "uptake_rate_mol_min_per_cell": 0.00002
+    },
+    {
+      "id": "payload-240m-003mol",
+      "payload_start_min": 240,
+      "payload_amount_mol": 0.03,
+      "uptake_rate_mol_min_per_cell": 0.00002
+    }
+  ],
+  "replicates": [
+    {"id": "fixed", "kind": "deterministic", "seed": null},
+    {"id": "seed-7", "kind": "seeded", "seed": 7},
+    {"id": "seed-17", "kind": "seeded", "seed": 17}
+  ]
+}

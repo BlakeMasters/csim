@@ -61,8 +61,9 @@ def parse_board(source: str) -> dict[str, object]:
 
 
 def status_kind(status: str) -> str:
-    value = status.casefold()
-    if value in {"done", "complete", "completed"}:
+    value = status.strip().casefold()
+    first = value.split(maxsplit=1)[0].rstrip(";:,") if value else ""
+    if first in {"done", "complete", "completed"}:
         return "done"
     if any(word in value for word in ("in progress", "active", "working", "running")):
         return "active"
@@ -83,6 +84,7 @@ def render_dashboard(board: dict[str, object], edited: str) -> str:
         ("Needs input", counts["waiting"]),
         ("Later", counts["later"]),
         ("Done", counts["done"]),
+        ("Other", counts["other"]),
     )
     stats_html = "".join(
         f'<div class="stat"><strong>{number}</strong><span>{escape(label)}</span></div>'
@@ -124,58 +126,77 @@ PAGE = """<!doctype html>
   <meta http-equiv="refresh" content="15">
   <title>CellSim agent work board</title>
   <style>
-    :root { color-scheme: light; font-family: system-ui, -apple-system, Segoe UI, sans-serif;
-      background: #f3f5f8; color: #1d2938; }
+    :root { color-scheme: dark; --bg: #07111b; --box: #102334; --line: #55778c;
+      --ink: #e9f6fa; --muted: #a9c5cf; --cyan: #69dfe5; --amber: #ffd178; }
     * { box-sizing: border-box; }
-    body { margin: 0; }
-    header { background: #17324d; color: #fff; padding: 3rem max(1.5rem, calc((100vw - 1120px) / 2)); }
-    header .eyebrow { color: #9de0d3; font-size: .78rem; font-weight: 700;
-      letter-spacing: .13em; text-transform: uppercase; }
-    h1 { font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1; margin: .65rem 0; }
-    header p { color: #d6e3ec; margin: .5rem 0 0; max-width: 700px; }
-    main { max-width: 1120px; margin: 0 auto; padding: 1.5rem; }
-    .meta { color: #526174; font-size: .85rem; margin: .3rem 0 1.5rem; }
-    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .8rem; }
-    .stat, .task, .activity { background: #fff; border: 1px solid #dce3eb;
-      border-radius: 12px; box-shadow: 0 2px 8px #17324d0a; }
-    .stat { padding: 1rem 1.1rem; }
-    .stat strong { display: block; font-size: 1.9rem; line-height: 1.1; }
-    .stat span { color: #536276; font-size: .85rem; }
-    h2 { font-size: 1.2rem; margin: 2.1rem 0 .85rem; }
-    .tasks { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: .9rem; }
-    .task { padding: 1.15rem; min-width: 0; }
-    .task-top { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
-    .task-id { font-size: .78rem; font-weight: 800; letter-spacing: .08em; color: #426078; }
-    .status { border-radius: 999px; padding: .28rem .65rem; font-size: .73rem;
-      font-weight: 700; white-space: nowrap; }
-    .status.done { background: #e2f5ec; color: #196445; }
-    .status.active { background: #e1eeff; color: #255a9f; }
-    .status.waiting { background: #fff0d0; color: #845300; }
-    .status.later { background: #ecedf0; color: #555d68; }
-    .status.other { background: #eee8fc; color: #5e418f; }
-    h3 { font-size: 1rem; line-height: 1.35; margin: .9rem 0 1rem; }
-    .owner { font-size: .78rem; color: #667486; margin: 0 0 .8rem; }
-    .owner strong { color: #25374a; margin-left: .35rem; }
-    .evidence { border-top: 1px solid #e8edf2; padding-top: .8rem; margin: 0;
-      color: #526174; font-size: .85rem; line-height: 1.45; overflow-wrap: anywhere; }
-    .activity { padding: .4rem 1.2rem; }
+    body { margin: 0; color: var(--ink); background-color: var(--bg);
+      background-image: linear-gradient(#102435 1px, transparent 1px),
+        linear-gradient(90deg, #102435 1px, transparent 1px);
+      background-size: 16px 16px; font: 11px/1.35 Consolas, "Cascadia Mono", monospace; }
+    header { min-height: 38px; padding: 8px max(12px, calc((100vw - 1460px) / 2));
+      background: #183345; border-bottom: 4px solid var(--cyan); }
+    h1 { margin: 0; padding-left: 9px; border-left: 6px solid var(--cyan);
+      font-size: 15px; line-height: 18px; letter-spacing: .05em; }
+    main { max-width: 1460px; margin: 0 auto; padding: 9px 12px 20px; }
+    .meta { margin: 0 0 8px; color: var(--muted); font-size: 10px; }
+    .stats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; }
+    .stat, .task, .activity { min-width: 0; background: var(--box); border: 2px solid var(--line);
+      border-radius: 0; box-shadow: 3px 3px 0 #050e17; }
+    .stat { display: flex; align-items: baseline; justify-content: space-between; gap: 6px;
+      padding: 5px 7px; }
+    .stat strong { font-size: 18px; line-height: 1; color: var(--cyan); }
+    .stat span { color: var(--muted); font-size: 10px; text-align: right; }
+    section { min-width: 0; }
+    h2 { margin: 11px 0 5px; padding: 3px 7px; border-left: 5px solid var(--cyan);
+      background: #173345; color: var(--ink); font-size: 11px; letter-spacing: .05em; }
+    .tasks { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
+    .task { display: grid; grid-template-columns: minmax(140px, .48fr) minmax(220px, 1fr)
+      minmax(130px, .48fr) minmax(330px, 2.15fr); gap: 7px; align-items: start;
+      padding: 5px 7px; }
+    .task:nth-child(even) { background: #142b3c; }
+    .task-top { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+    .task-id { color: var(--cyan); font-size: 10px; font-weight: 900; overflow-wrap: anywhere; }
+    .status { display: inline-block; max-width: 100%; padding: 1px 4px; border: 1px solid currentColor;
+      border-radius: 0; font-size: 9px; line-height: 1.2; overflow-wrap: anywhere; }
+    .status.done { color: #86e0bb; background: #1c493d; }
+    .status.active { color: #69dfe5; background: #17445a; }
+    .status.waiting { color: var(--amber); background: #4c3924; }
+    .status.later { color: #c5d1d7; background: #283b48; }
+    .status.other { color: #bbabff; background: #352c55; }
+    h3 { margin: 0; font-size: 11px; line-height: 1.3; font-weight: 700; }
+    .owner { margin: 0; color: var(--muted); font-size: 10px; overflow-wrap: anywhere; }
+    .owner strong { display: block; color: var(--ink); font-weight: 600; }
+    .evidence { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.3;
+      overflow-wrap: anywhere; }
+    .activity { padding: 0 7px; }
     .activity ol { list-style: none; margin: 0; padding: 0; }
-    .activity li { border-bottom: 1px solid #e8edf2; padding: .9rem 0; }
+    .activity li { display: grid; grid-template-columns: 130px minmax(250px, 1fr) minmax(300px, 1.2fr);
+      gap: 7px; padding: 6px 0; border-bottom: 1px solid #315268; }
     .activity li:last-child { border-bottom: 0; }
-    .activity time { color: #426078; font-size: .76rem; font-weight: 700; }
-    .activity p { margin: .25rem 0; font-size: .9rem; }
-    .activity small { color: #667486; overflow-wrap: anywhere; }
-    .empty { color: #667486; }
-    footer { color: #667486; font-size: .78rem; margin: 2rem 0 .5rem; }
-    @media (max-width: 640px) { header { padding: 2rem 1.2rem; } main { padding: 1.2rem; } }
+    .activity time { color: var(--cyan); font-size: 10px; font-weight: 700; }
+    .activity p, .activity small { margin: 0; font-size: 10px; line-height: 1.3; overflow-wrap: anywhere; }
+    .activity small { color: var(--muted); }
+    .empty, footer { color: var(--muted); }
+    footer { margin: 12px 0 0; font-size: 10px; }
+    @media (max-width: 960px) {
+      .task { grid-template-columns: minmax(110px, .4fr) minmax(0, 1fr); }
+      .task .owner, .task .evidence { grid-column: 2; }
+      .activity li { grid-template-columns: 105px minmax(0, 1fr); }
+      .activity small { grid-column: 2; }
+    }
+    @media (max-width: 620px) {
+      .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .task { grid-template-columns: minmax(0, 1fr); }
+      .task-top { flex-direction: row; align-items: center; flex-wrap: wrap; }
+      .task .owner, .task .evidence { grid-column: 1; }
+      .owner strong { display: inline; }
+      .activity li { grid-template-columns: minmax(0, 1fr); }
+      .activity small { grid-column: 1; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <div class="eyebrow">CellSim / project coordination</div>
-    <h1>Agent work board</h1>
-    <p>A read-only view of the assignments and evidence recorded in <code>.agents/BOARD.md</code>.</p>
-  </header>
+  <header><h1>Agent work board</h1></header>
   <main>
     <p class="meta">Board says updated {{UPDATED}} · File edited {{EDITED}} · Refreshes every 15 seconds</p>
     <div class="stats" aria-label="Task counts">{{STATS}}</div>

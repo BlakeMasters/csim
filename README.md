@@ -16,6 +16,8 @@ foundation; its evidence does not establish a validated tumor simulator.
 
 ## Start here
 
+- **[Live demo runbook](docs/LIVE_DEMO_RUNBOOK.md):** preflight and launch the
+  local work board, virtual-cell playground and preserved campaign review.
 - **[Project direction](docs/PROJECT_DIRECTION.md):** the intended platform,
   current capabilities, and the next milestones.
 - **[Cell-model RL environments](docs/CELL_MODEL_RL_ENVIRONMENTS.md):** proposed
@@ -34,8 +36,10 @@ foundation; its evidence does not establish a validated tumor simulator.
 - **[Implementation status](IMPLEMENTATION_STATUS.md):** executed results,
   environments, and the limits of each implemented component.
 - **[Build backlog](docs/BUILD_BACKLOG.md):** concrete tasks and completion criteria.
+- **[Shared local demo](docs/INTEGRATED_DEMO.md):** run the observed and synthetic
+  components locally with a required Ocura OSS command record.
 - **[Hackathon environment](docs/HACKATHON_ENVIRONMENT.md):** local XLSX/MAT
-  reader qualification, pinned optional dependencies, and the Ocura OSS ledger.
+  reader qualification, tested dependency pins, and the Ocura OSS ledger.
 - **[Work board](.agents/BOARD.md):** assignments, status, and evidence IDs for
   work coordinated in this checkout.
 
@@ -45,6 +49,21 @@ Run `python tools/agent_dashboard.py` and open <http://127.0.0.1:8765/>. The
 read-only page renders `.agents/BOARD.md` and refreshes every 15 seconds. Edit
 the board to change assignments or statuses. It shows recorded work, not live
 agent presence, and uses only Python's standard library on localhost.
+
+## Shared demo entrypoint
+
+The installed package requires `ocura-oss==0.4.0`. With the tested `.venv`
+and the verified local NF-κB MAT file, run the [integrated demo](docs/INTEGRATED_DEMO.md)
+through the required OSS record:
+
+```powershell
+$RunDir = 'runs/integrated_demo_oss_' + (Get-Date).ToUniversalTime().ToString('yyyyMMddTHHmmssZ')
+& .venv/Scripts/python.exe tools/run_integrated_demo.py oss --output $RunDir
+```
+
+Ocura Engine is an optional local execution route and is not included in this
+repository. Individual source-checkout numerical modules remain importable
+without installing the package.
 
 ## Run the current groundwork
 

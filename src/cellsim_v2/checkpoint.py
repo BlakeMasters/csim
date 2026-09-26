@@ -47,12 +47,27 @@ def _tuples(value: Any) -> Any:
     return tuple(_tuples(v) for v in value) if isinstance(value,list) else value
 
 
+def _check_private_json(value: Any) -> None:
+    """Reject values whose Python shape would change on a JSON round-trip."""
+    if type(value) is dict:
+        for key, item in value.items():
+            if type(key) is not str:
+                raise ValueError("private state JSON keys must be strings")
+            _check_private_json(item)
+    elif type(value) is list:
+        for item in value:
+            _check_private_json(item)
+    elif value is not None and type(value) not in (str, int, float, bool):
+        raise ValueError("private state must contain only JSON-native values")
+
+
 def save_checkpoint(path: Path, world: World, rng: random.Random,
                     execution_fingerprint: str, private_json: dict | None = None) -> None:
     if not isinstance(execution_fingerprint,str) or not execution_fingerprint:
         raise ValueError("execution fingerprint required")
     if private_json is not None and not isinstance(private_json,dict):
         raise TypeError("private state must be a JSON dictionary")
+    _check_private_json({} if private_json is None else private_json)
     payload={"format":FORMAT,"execution_fingerprint":execution_fingerprint,
              "world":encode_world(world),"rng_state":rng.getstate(),
              "private_json":{} if private_json is None else private_json}

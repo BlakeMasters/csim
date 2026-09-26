@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Csim pixel renderer · isolated preview</title>
+  <link rel="stylesheet" href="pixel_renderer.css">
+  <style>
+    :root{color-scheme:dark;--bg:#07111b;--box:#102334;--line:#547489;--ink:#e9f6fa;--cyan:#69dfe5;--amber:#ffd178;--muted:#a9c5cf}
+    *{box-sizing:border-box}body{margin:0;background-color:var(--bg);background-image:linear-gradient(#102435 1px,transparent 1px),linear-gradient(90deg,#102435 1px,transparent 1px);background-size:16px 16px;color:var(--ink);font:12px/1.35 Consolas,"Cascadia Mono",monospace}
+    .top{height:38px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 14px;background:#183345;border-bottom:4px solid var(--cyan);box-shadow:0 3px 0 #050e17}
+    .brand{color:var(--cyan);font-weight:900;letter-spacing:.09em}.brand:before{content:"";display:inline-block;width:9px;height:9px;margin-right:9px;background:var(--cyan);box-shadow:3px 3px 0 #07111b}.top-status{color:var(--amber);white-space:nowrap}
+    main{max-width:1440px;margin:auto;padding:10px 12px}.title{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px}
+    h1{font-size:16px;letter-spacing:.04em;margin:0;color:var(--ink);border-left:7px solid var(--cyan);padding-left:8px}.tag{color:var(--muted)}
+    .toolbar,.terminal-box{border:3px solid var(--line);background:var(--box);margin-bottom:10px;box-shadow:4px 4px 0 #050e17,inset 0 0 0 2px #07111b}
+    .controls{display:flex;gap:5px;align-items:center;flex-wrap:wrap;padding:7px 8px}
+    button,select{font:inherit;background:#17384b;color:var(--ink);border:2px solid var(--line);border-radius:0;padding:6px 8px;cursor:pointer;box-shadow:2px 2px 0 #06121d}
+    button:hover,button:focus-visible,select:focus-visible{outline:2px solid var(--amber);background:#27556b}button.active{background:#69dfe5;color:#07111b;border-color:#d9ffff;font-weight:900}
+    #step{background:#315d4f;border-color:#76e2b8}#reject{border-color:#ac6c73}#replay{border-color:#8d82bc}
+    .controls label{color:var(--muted);display:flex;align-items:center;gap:5px}.controls input{accent-color:var(--amber)}
+    .terminal-body{padding:7px}.csim-pixel-layout{grid-template-columns:minmax(0,1fr) minmax(210px,258px)}
+    .status{padding:7px 8px;border-top:3px solid var(--line);color:var(--muted);background:#172d3b}.status b{color:var(--amber)}
+    .evidence{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.plot{min-width:0;border:3px solid var(--line);background:#102334;padding:7px;box-shadow:3px 3px 0 #050e17}.plot-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}.plot-top strong{font-size:11px;letter-spacing:.04em}.plot-top span{color:var(--muted);font-size:10px}.plot canvas{display:block;width:100%;height:177px;border:2px solid #315268;background:#0c1b2b}.legend{display:flex;gap:5px 12px;flex-wrap:wrap;margin:5px 0;color:var(--muted);font-size:10px}.legend b{font-weight:700}.obs{color:#86e0bb}.fit{color:var(--amber)}.sim{color:#bbabff}.base{color:var(--cyan)}.plot-meta,.fixture-note{color:var(--muted);font-size:10px;margin:6px 0 0}.plot-meta{min-height:26px}.fixture-note a{color:var(--cyan)}
+    @media(max-width:760px){.title{display:block}.evidence{grid-template-columns:1fr}.csim-pixel-layout{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="top"><span class="brand">CSIM / VIRTUAL CELL</span><span class="top-status">OBS + SYN · separate scales</span></div>
+  <main>
+    <div class="title"><h1>Shared field</h1><span class="tag">Select a cell to inspect its accepted state</span></div>
+    <div class="toolbar"><div class="controls">
+      <button data-mode="nfkb" class="active">NF-κB</button><button data-mode="arena">ARENA</button><button data-mode="ligand">LIGAND</button><button data-mode="uptake">UPTAKE</button>
+      <label>CELLS <select id="count"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></label>
+      <label><input id="seeded" type="checkbox" checked>SEEDED</label>
+      <button id="step">ACCEPT STEP</button><button id="reject">INJECT REJECTION</button><button id="replay">REPLAY CUE</button><button id="reset">RESET</button>
+    </div></div>
+    <div class="terminal-box"><div class="terminal-body"><div class="csim-pixel-layout">
+      <canvas id="scene" class="csim-pixel-canvas" width="720" height="220" tabindex="0" aria-label="Shared synthetic field and selectable cell instances"></canvas>
+      <div id="inspector" class="csim-pixel-inspector" aria-live="polite"></div>
+    </div><p class="csim-pixel-note">Arrows mark accepted paired transfer. Stimulus switches appear on the time ruler.</p></div><div class="status" id="status"></div></div>
+    <div class="evidence">
+      <div class="plot"><div class="plot-top"><strong class="obs">OBS / normalized p65</strong><span>condition 2 · evaluation split</span></div><canvas id="observed-plot" aria-label="Observed p65 row dispersion, mean and frozen empirical prediction"></canvas><div class="legend"><span><b class="obs">■</b> p10–p90 rows</span><span><b class="obs">━</b> median</span><span>┄ mean</span><span><b class="fit">━</b> frozen fit</span></div><p class="plot-meta" id="observed-meta">Loading preserved observed overlay…</p></div>
+      <div class="plot"><div class="plot-top"><strong class="sim">SYN / reporter proxy</strong><span>selected cell count · seeded runs</span></div><canvas id="simulated-plot" aria-label="Synthetic seeded cell trajectories and pooled spread on an independent vertical scale"></canvas><div class="legend"><span><b class="sim">■</b> pooled p10–p90</span><span><b class="sim">━</b> median</span><span>thin lines · cells</span><span><b class="base">┄</b> deterministic</span></div><p class="plot-meta" id="simulated-meta">Loading preserved seeded episodes…</p></div>
+    </div>
+    <p class="fixture-note" id="source-note">Scene buttons are UI fixtures. Plots load preserved local <a href="/runs/nfkb_metadata_20260926_01/demo_overlay.json">observed overlay</a> and <a href="/runs/seeded_nfkb_demo_20260926_01/results.json">seeded episode</a> artifacts. Their vertical scales are independent.</p>
+  </main>
+  <script src="pixel_renderer.js"></script>
+  <script src="pixel_evidence_charts.js"></script>
+  <script>
+    const scene=document.getElementById("scene"), panel=document.getElementById("inspector");
+    let state, selected="cell_1", mode="nfkb";
+    let sourceOverlay=null, seededResult=null, overlay=null, simBand=null, switchTimes=[];
+    function drawEvidence(){
+      if(!sourceOverlay||!seededResult)return;
+      const count=Number(document.getElementById("count").value);
+      const summary=CsimPixelEvidence.summarize(sourceOverlay,seededResult,count,2);
+      const obs=summary.observed, sim=summary.simulated;
+      CsimPixelEvidence.renderChart(document.getElementById("observed-plot"),obs,"observed");
+      CsimPixelEvidence.renderChart(document.getElementById("simulated-plot"),sim,"simulated");
+      overlay=sourceOverlay.conditions.find(c=>c.condition_id===2);
+      switchTimes=sourceOverlay.switch_times_min;
+      simBand=sim?{p10:sim.low,p50:sim.median,p90:sim.high}:null;
+      const counts=obs.finiteCounts.filter(Number.isFinite);
+      document.getElementById("observed-meta").textContent=`${obs.rowCount} source rows · ${obs.time.length} time points · finite rows ${Math.min(...counts)}–${Math.max(...counts)} · normalized Nuc/Cyto p65`;
+      document.getElementById("simulated-meta").textContent=sim?
+        `${sim.seeds.length} seeds (${sim.seeds.join(", ")}) × ${sim.cellCount} cells = ${sim.trajectoryCount} traces · pooled pointwise quantiles`:
+        summary.reason;
+    }
+    async function loadEvidence(){
+      const read=async path=>{const response=await fetch(path);if(!response.ok)throw new Error(`${path}: HTTP ${response.status}`);return response.json();};
+      try{
+        [sourceOverlay,seededResult]=await Promise.all([
+          read("/runs/nfkb_metadata_20260926_01/demo_overlay.json"),
+          read("/runs/seeded_nfkb_demo_20260926_01/results.json")]);
+        drawEvidence();paint();
+      }catch(error){
+        sourceOverlay=null;seededResult=null;overlay=null;simBand=null;
+        document.getElementById("observed-meta").textContent=`Preserved plots unavailable: ${error.message}`;
+        document.getElementById("simulated-meta").textContent="No fixture plot substituted.";
+        paint();
+      }
+    }
+    function makeState(name) {
+      const count=(name==="nfkb"||name==="arena")?Number(document.getElementById("count").value):name==="ligand"?2:1;
+      const seeded=document.getElementById("seeded").checked;
+      const common={mode:name,configuration:{cell_count:count,horizon_steps:name==="nfkb"?82:8,step_min:6,step_s:1},timeline:[],accepted_steps:0,
+        seed:seeded?743:null,replicate_id:seeded?"R03":null,last_replay:null,last_record:null};
+      if(name==="nfkb") common.observation={time_min:0,remaining_steps:82,stimulus_code:null,
+        field:{synthetic_stimulus:{amount_mol:0,concentration_mol_m3:0},generic_inhibitor_payload:{amount_mol:.04,concentration_mol_m3:.32}},
+        cells:Array.from({length:count},(_,i)=>({cell_id:`cell_${i+1}`,payload_amount_mol:0,nuclear_proxy:.08*i,
+          feedback:.04*i,reporter_index:.03*i,position_m:[.1+i*.08,.2,.1]}))};
+      else if(name==="arena") common.observation={time_s:0,remaining_steps:8,field_amount_mol:.12,field_concentration_mol_m3:.96,
+        cells:Array.from({length:count},(_,i)=>({cell_id:`cell_${i+1}`,amount_mol:.003*i,memory:.05*i,position_m:[.1+i*.08,.2,.1]}))};
+      else if(name==="ligand") common.observation={time_s:0,remaining_steps:8,field_concentration_mol_m3:0,
+        sender_amount_mol:.1,receiver_amount_mol:0,receiver_memory:0};
+      else common.observation={time_s:0,remaining_steps:8,local_concentration_mol_m3:.8,
+        cell_amount_mol:0,accepted_memory:0};
+      return common;
+    }
+    function clone(x){return JSON.parse(JSON.stringify(x));}
+    function paint(){
+      const options={selectedCellId:selected,overlayCondition:overlay,switchTimesMin:switchTimes,
+        simulationBand:simBand};
+      const result=CsimPixelRenderer.render(scene,state,options);
+      CsimPixelRenderer.renderInspector(panel,state,selected);
+      document.getElementById("status").innerHTML=`STATUS <b>${result.latestStatus.toUpperCase()}</b> · ${result.cellHitboxes.length} CELL(S) · ${state.accepted_steps} ACCEPTED · ${state.seed==null?"DETERMINISTIC":"SEED "+state.seed}`;
+    }
+    function reset(){state=makeState(mode);selected=mode==="ligand"?"sender":"cell_1";drawEvidence();paint();}
+    function advance(){
+      const before=clone(state.observation),after=clone(before),info={};
+      if(mode==="nfkb"){
+        after.time_min+=6;after.remaining_steps--;after.stimulus_code="T";
+        after.field.synthetic_stimulus.amount_mol=.125;after.field.synthetic_stimulus.concentration_mol_m3=1;
+        after.field.generic_inhibitor_payload.amount_mol=Math.max(0,after.field.generic_inhibitor_payload.amount_mol-.003*after.cells.length);
+        after.field.generic_inhibitor_payload.concentration_mol_m3=after.field.generic_inhibitor_payload.amount_mol/.125;
+        info.payload_transfers_mol_by_cell={};after.cells.forEach((c,i)=>{const d=.003;
+          c.payload_amount_mol+=d;c.nuclear_proxy=Math.min(1,c.nuclear_proxy+.06+i*.025);
+          c.feedback+=.018+i*.006;c.reporter_index+=.025+i*.012;info.payload_transfers_mol_by_cell[c.cell_id]=d;});
+      } else if(mode==="arena"){
+        after.time_s++;after.remaining_steps--;after.field_amount_mol-=.004*after.cells.length;
+        after.field_concentration_mol_m3=after.field_amount_mol/.125;info.transfers_mol_by_cell={};
+        after.cells.forEach((c,i)=>{c.amount_mol+=.004;c.memory+=.08+i*.03;info.transfers_mol_by_cell[c.cell_id]=.004;});
+      } else if(mode==="ligand"){
+        after.time_s++;after.remaining_steps--;after.sender_amount_mol-=.01;
+        after.field_concentration_mol_m3+=.08;after.receiver_memory+=.1;info.integrated_transfer_mol=.01;
+      } else {after.time_s++;after.remaining_steps--;after.local_concentration_mol_m3-=.08;
+        after.cell_amount_mol+=.01;after.accepted_memory+=.1;info.integrated_transfer_mol=.01;}
+      state.observation=after;state.accepted_steps++;
+      state.timeline.push({index:state.timeline.length+1,kind:"accepted",mode,before,
+        proposal:mode==="nfkb"?{stimulus_code:state.accepted_steps===1?"T":null}:undefined,
+        transition:{observation:clone(after),info}});state.last_replay=null;paint();
+    }
+    document.querySelectorAll("[data-mode]").forEach(button=>button.addEventListener("click",()=>{
+      mode=button.dataset.mode;document.querySelectorAll("[data-mode]").forEach(b=>b.classList.toggle("active",b===button));reset();}));
+    document.getElementById("count").addEventListener("change",reset);
+    document.getElementById("seeded").addEventListener("change",reset);
+    document.getElementById("step").addEventListener("click",advance);
+    document.getElementById("reject").addEventListener("click",()=>{state.timeline.push({index:state.timeline.length+1,kind:"rejected",mode,before:clone(state.observation),state_unchanged:true,reason:"fixture overdraw"});paint();});
+    document.getElementById("replay").addEventListener("click",()=>{state.last_replay={equal:true,accepted_steps:state.accepted_steps};paint();});
+    document.getElementById("reset").addEventListener("click",reset);
+    scene.addEventListener("click",event=>{selected=CsimPixelRenderer.pickCell(scene,event,state);paint();});
+    scene.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();
+      const ids=state.observation.cells?.map(c=>c.cell_id)||(mode==="ligand"?["sender","receiver"]:["cell_1"]);
+      selected=ids[(ids.indexOf(selected)+1)%ids.length];paint();}});
+    addEventListener("resize",()=>{drawEvidence();paint();});reset();loadEvidence();
+  </script>
+</body>
+</html>
