@@ -32,6 +32,8 @@ from cellsim_v2.nfkb_predictor import predict_frozen
 from cellsim_v2.shared_cell_arena import SharedCellArena
 from cellsim_v2.symbolic_logic import from_ruleset
 from cellsim_v2.synthetic_cell_episode import make_synthetic_episode
+from run_symbolic_demo import run as run_symbolic_demo
+from cellsim_v2.symbolic_logic import canonical_digest
 
 
 def _finite(value: object, name: str, *, minimum: float = 0.0,
@@ -555,6 +557,26 @@ BOARD_URL = "http://127.0.0.1:8765/"
 PORT = 8766
 
 
+def _run_symbolic_experiment(session: DemoSession) -> dict:
+    """Run the displayed, fixed synthetic IR through its checked lowering path."""
+    output = ROOT / "runs" / ("interactive_symbolic_" +
+        datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ_") + uuid.uuid4().hex[:8])
+    report = run_symbolic_demo(output)
+    if (report["status"] != "completed" or not report["trace_bytes_equal"] or
+            report["symbolic_ir_sha256"] != canonical_digest(session.symbolic_ir) or
+            report["lowered_ruleset_sha256"] != session.symbolic_ir["ruleset_sha256"]):
+        raise RuntimeError("symbolic execution did not match the displayed program")
+    trace = [json.loads(line) for line in
+             (output / "roundtripped/trace.jsonl").read_text(encoding="utf-8").splitlines()]
+    return {"status": "completed", "scope": report["scope"],
+            "symbolic_ir_sha256": report["symbolic_ir_sha256"],
+            "ruleset_sha256": report["lowered_ruleset_sha256"],
+            "accepted_intervals": report["accepted_intervals"],
+            "trace_bytes_equal": report["trace_bytes_equal"],
+            "balance_residual_mol": report["total_balance_residual_mol"],
+            "artifact_path": str(output), "trace": trace}
+
+
 def _validate_board_url(value: str) -> str:
     try:
         parsed = urlsplit(value)
@@ -685,6 +707,10 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(200, _nfkb_compare(request))
             elif self.path == "/api/nfkb/predict":
                 self._json(200, _nfkb_predict(request))
+            elif self.path == "/api/symbolic/run":
+                if request:
+                    raise ValueError("symbolic run takes no request fields")
+                self._json(200, _run_symbolic_experiment(SESSION))
             else:
                 self._json(404, {"status": "error", "error": "unknown endpoint"})
         except (ValueError, json.JSONDecodeError, UnicodeDecodeError) as exc:
@@ -848,6 +874,19 @@ PAGE = PAGE.replace('<button id="record">Record through Engine + OSS</button>',
 PAGE = PAGE.replace("The ledger button replays a complete uptake episode through a fixed local command. Engine and OSS IDs are execution evidence, separate from simulation results.",
                     "The OSS button records an exact complete uptake replay. Engine is optional and only appears when configured. NF-κB interactive actions are not yet recordable here.")
 PAGE = PAGE.replace("Engine, ledger and artifact", "Ocura OSS ledger and optional Engine")
+PAGE = PAGE.replace(
+    '<section><h2>Typed symbolic program</h2><p class="muted">The current version-0 language executes only a synthetic concentration switch and gated same-species transfer. It is a separate reference scenario from the interactive episode.</p>',
+    '<section id="dsl-experiment"><h2>Typed symbolic program</h2><p class="muted">Run this fixed five-interval DSL experiment to plot an accepted cell–field trace. It encodes a synthetic concentration switch and gated same-species transfer. The other interactive episodes use their own typed action APIs.</p>')
+PAGE = PAGE.replace(
+    '<div id="symbolic-summary" class="evidence-grid"></div>',
+    '<div id="symbolic-summary" class="evidence-grid"></div>'
+    '<button id="symbolic-run" type="button">Run DSL experiment</button>'
+    '<p id="symbolic-run-status" class="status-line" role="status"></p>'
+    '<div id="symbolic-charts" class="charts"></div>'
+    '<div class="table-wrap"><table><thead><tr><th>Time (s)</th>'
+    '<th>Input concentration (mol/m³)</th><th>Cell amount (mol)</th>'
+    '<th>Field amount (mol)</th><th>Accepted rule events</th></tr></thead>'
+    '<tbody id="symbolic-trace"></tbody></table></div>')
 PAGE = PAGE.replace("</head>", '<link rel="stylesheet" href="/pixel_renderer.css"></head>')
 PAGE = PAGE.replace("</head>", '<link rel="stylesheet" href="/playground_pixel_theme.css"></head>')
 PAGE = PAGE.replace('<script src="/app.js"></script>',
@@ -877,6 +916,7 @@ PAGE = PAGE.replace("</header>",
                     '<button type="button" data-cell-preset="1">1 cell</button>'
                     '<button type="button" data-cell-preset="3">3 cells</button>'
                     '<button type="button" data-cell-preset="5">5 cells</button>'
+                    '<a href="#dsl-experiment">DSL experiment ↗</a>'
                     '<a href="http://127.0.0.1:8765/" target="_blank" rel="noopener">Agent board ↗</a>'
                     '</div></section></header>', 1)
 PAGE = PAGE.replace("<section><h2>Proposer and learner iterations",
@@ -890,6 +930,7 @@ APP_JS = r"""
 let state = null;
 let observedIndex = null, observedCondition = null;
 let nfkbComparison = null;
+let symbolicResult = null;
 let predictorResult = null;
 let coupledArena = null;
 const $ = id => document.getElementById(id);
@@ -1262,6 +1303,20 @@ function renderSymbolic() {
   evidenceCard(box,"Last integrated execution",e.status||"pending");
   evidenceCard(box,"Direct / lowered trace",e.trace_bytes_equal===undefined?"pending":e.trace_bytes_equal);
   $("symbolic-json").textContent=JSON.stringify(p,null,2);
+  const plots=$("symbolic-charts"),tbody=$("symbolic-trace");plots.replaceChildren();tbody.replaceChildren();
+  if(!symbolicResult)return;
+  evidenceCard(box,"Executed DSL intervals",symbolicResult.accepted_intervals);
+  evidenceCard(box,"Amount balance residual (mol)",symbolicResult.balance_residual_mol);
+  const trace=symbolicResult.trace;
+  for(const [label,key,color] of [["Cell inventory (mol)","cell_amount_mol","#79dfbd"],
+      ["Shared field (mol)","field_amount_mol","#80aaf9"]]){
+    const card=node("div",undefined,"chart"),canvas=node("canvas");
+    card.append(node("label",label),canvas);plots.append(card);chart(canvas,trace.map(row=>row[key]),color);
+  }
+  for(const row of trace){const tr=node("tr");
+    for(const key of ["time_s","input_concentration_mol_m3","cell_amount_mol","field_amount_mol","accepted_event_count"])
+      tr.append(node("td",row[key]));tbody.append(tr);}
+  $("symbolic-run-status").textContent=`Executed from validated DSL JSON and lowered rules. Direct/lowered traces match: ${symbolicResult.trace_bytes_equal}. Run: ${symbolicResult.artifact_path}. Synthetic only.`;
 }
 function observedPanel() {
   let panel=$("observed-panel");if(panel)return panel;
@@ -1426,6 +1481,10 @@ $("step").addEventListener("click",async()=>{try{let request;
   const result=await api("/api/step","POST",request);
   state=result.state;message("action-status",result.status==="accepted"?"Step accepted; field and response state advanced.":"Rejected: "+result.event.reason,result.status!=="accepted");render();}catch(error){message("action-status",error.message,true);}});
 $("replay").addEventListener("click",async()=>{try{state=await api("/api/replay","POST",{});message("action-status",state.last_replay.equal?"Replay matched all accepted steps and the checkpoint.":"Replay differed; inspect the session.",!state.last_replay.equal);render();}catch(error){message("action-status",error.message,true);}});
+$("symbolic-run").addEventListener("click",async()=>{const button=$("symbolic-run");button.disabled=true;
+  message("symbolic-run-status","Running the fixed five-interval DSL experiment…");
+  try{symbolicResult=await api("/api/symbolic/run","POST",{});renderSymbolic();}
+  catch(error){message("symbolic-run-status",error.message,true);}finally{button.disabled=false;}});
 $("export").addEventListener("click",()=>{window.location.href="/api/session.json";message("record-status","Downloaded complete accepted uptake session.");});
 async function recordSession(route){message("record-status",route==="oss"?"Recording exact uptake replay through Ocura OSS…":"Running optional Engine + OSS replay…");
   $("record").disabled=true;$("record-engine").disabled=true;

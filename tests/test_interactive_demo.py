@@ -19,6 +19,22 @@ import run_interactive_demo as demo
 
 
 class InteractiveDemoTests(unittest.TestCase):
+    def test_symbolic_visual_run_is_lowered_execution_and_preserves_episode(self):
+        session = demo.DemoSession(None)
+        checkpoint = session.episode.checkpoint()
+        with tempfile.TemporaryDirectory() as scratch:
+            root = Path(scratch)
+            (root / "runs").mkdir()
+            with patch.object(demo, "ROOT", root):
+                result = demo._run_symbolic_experiment(session)
+            self.assertEqual(result["status"], "completed")
+            self.assertTrue(result["trace_bytes_equal"])
+            self.assertEqual(len(result["trace"]), 5)
+            self.assertEqual(result["ruleset_sha256"], session.symbolic_ir["ruleset_sha256"])
+            self.assertTrue((Path(result["artifact_path"]) / "symbolic_ir.json").is_file())
+            self.assertGreater(result["trace"][-1]["cell_amount_mol"], 0)
+        self.assertEqual(session.episode.checkpoint(), checkpoint)
+
     def test_uptake_acceptance_rejection_replay_and_export(self):
         session = demo.DemoSession(None)
         config = dict(demo.MODES["uptake"].defaults, horizon_steps=2)
