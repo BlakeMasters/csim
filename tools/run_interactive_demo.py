@@ -181,6 +181,88 @@ def _read_json(path: Path) -> dict | None:
     return value if type(value) is dict else None
 
 
+def _load_coupled_arena(path: Path) -> dict:
+    """Bind one completed synthetic arena result to its verified OSS sidecar."""
+    path = path.resolve()
+    if path.name != "results.json" or not path.is_file() or path.stat().st_size > 2_000_000:
+        raise ValueError("--coupled-arena-result must name one existing results.json under 2 MB")
+    raw = path.read_bytes()
+    try:
+        result = json.loads(raw.decode("utf-8"), object_pairs_hook=_json_pairs,
+                            parse_constant=_reject_constant)
+    except (UnicodeDecodeError, ValueError) as exc:
+        raise ValueError("coupled arena result must be strict UTF-8 JSON") from exc
+    receipt = _read_json(path.with_name("oss_record.json"))
+    if type(result) is not dict or result.get("status") != "pass" or receipt is None:
+        raise ValueError("coupled arena requires a passed result and adjacent OSS record")
+    digest = hashlib.sha256(raw).hexdigest()
+    if (receipt.get("results_sha256") != digest or receipt.get("status") != "passed"
+            or receipt.get("source_test_tool_sha256") != result.get("source_test_tool_sha256")):
+        raise ValueError("coupled arena result/OSS SHA-256 or status does not match")
+    verification = receipt.get("verification")
+    if (type(verification) is not dict or verification.get("status") != "ok"
+            or verification.get("problems") != []
+            or type(receipt.get("atom_id")) is not str
+            or type(receipt.get("chokepoint_id")) is not str):
+        raise ValueError("coupled arena OSS verification is incomplete")
+    config = result.get("configuration")
+    if type(config) is not dict or type(config.get("cell_count")) is not int or not 1 <= config["cell_count"] <= 5:
+        raise ValueError("coupled arena cell count is invalid")
+    horizon = config.get("horizon_steps")
+    if type(horizon) is not int or not 1 <= horizon <= 100:
+        raise ValueError("coupled arena horizon is invalid")
+    expected_ids = {f"cell_{i}" for i in range(1, config["cell_count"] + 1)}
+    cases = result.get("cases")
+    if type(cases) is not dict or set(cases) != {"baseline", "coupled"}:
+        raise ValueError("coupled arena requires matched baseline/coupled cases")
+    selected_cases = {}
+    for name in ("baseline", "coupled"):
+        case = cases[name]
+        if type(case) is not dict or case.get("accepted_steps") != horizon:
+            raise ValueError("coupled arena case has an incomplete accepted horizon")
+        trace = case.get("trace")
+        if type(trace) is not list or len(trace) != horizon + 1:
+            raise ValueError("coupled arena case trace length is invalid")
+        selected_trace = []
+        for sample in trace:
+            if type(sample) is not dict or type(sample.get("cells")) is not list:
+                raise ValueError("coupled arena sample is invalid")
+            cells = sample["cells"]
+            if len(cells) != config["cell_count"] or {c.get("cell_id") for c in cells} != expected_ids:
+                raise ValueError("coupled arena cell identities are invalid")
+            selected_cells = []
+            for cell in cells:
+                position = cell.get("position_m")
+                if type(position) is not list or len(position) != 3:
+                    raise ValueError("coupled arena cell position is invalid")
+                selected_cells.append({"cell_id": cell["cell_id"], "model_id": cell.get("model_id"),
+                                       "position_m": [_finite(v, "position_m", maximum=1e9) for v in position],
+                                       "nuclear_proxy": _finite(cell.get("nuclear_proxy"), "nuclear_proxy", maximum=1e9),
+                                       "feedback": _finite(cell.get("feedback"), "feedback", maximum=1e9),
+                                       "reporter_index": _finite(cell.get("reporter_index"), "reporter_index", maximum=1e9),
+                                       "mediator_inventory_mol": _finite(cell.get("mediator_inventory_mol"), "mediator_inventory_mol", maximum=1e9)})
+            selected_trace.append({"time_min": _finite(sample.get("time_min"), "time_min", maximum=1e9),
+                                   "stimulus_code": sample.get("stimulus_code"),
+                                   "mediator_field_amount_mol": _finite(sample.get("mediator_field_amount_mol"), "mediator amount", maximum=1e9),
+                                   "mediator_field_concentration_mol_m3": _finite(sample.get("mediator_field_concentration_mol_m3"), "mediator concentration", maximum=1e9),
+                                   "mediator_waste_amount_mol": _finite(sample.get("mediator_waste_amount_mol"), "mediator waste", maximum=1e9),
+                                   "cells": selected_cells})
+        selected_cases[name] = {"trace": selected_trace, "accepted_steps": horizon,
+                                "checkpoint_replay_equal": case.get("checkpoint_replay_equal"),
+                                "maximum_amount_residual_mol": case.get("maximum_amount_residual_mol")}
+    if ([item["time_min"] for item in selected_cases["baseline"]["trace"]]
+            != [item["time_min"] for item in selected_cases["coupled"]["trace"]]):
+        raise ValueError("coupled arena case clocks differ")
+    return {"status": "available", "scope": "synthetic coupled NF-κB arena; not a measured or fitted mediator model",
+            "artifact_path": str(path), "result_sha256": digest,
+            "source_test_tool_sha256": result.get("source_test_tool_sha256"),
+            "oss_atom_id": receipt["atom_id"], "oss_chokepoint_id": receipt["chokepoint_id"],
+            "oss_verified_logs": verification.get("logs_checked"),
+            "configuration": config, "comparison": result.get("comparison"),
+            "maximum_amount_residual_mol": result.get("maximum_amount_residual_mol"),
+            "cases": selected_cases}
+
+
 def _latest_evidence(explicit: Path | None) -> dict:
     runs = ROOT / "runs"
     candidates = [explicit.resolve()] if explicit is not None else [
@@ -322,6 +404,7 @@ class DemoSession:
                                     (ROOT / "tools/replay_interactive_trace.py").is_file()),
             "engine_recording_available": ENGINE_CLI is not None,
             "campaign_report_available": CAMPAIGN_HTML is not None,
+            "coupled_arena_available": COUPLED_ARENA is not None,
             "symbolic_program": {"schema_version": self.symbolic_ir["schema_version"],
                                  "kind": self.symbolic_ir["kind"],
                                  "ruleset_sha256": self.symbolic_ir["ruleset_sha256"],
@@ -467,6 +550,7 @@ OBSERVED: dict | None = None
 RESIDUAL: dict | None = None
 FROZEN: dict | None = None
 CAMPAIGN_HTML: bytes | None = None
+COUPLED_ARENA: dict | None = None
 BOARD_URL = "http://127.0.0.1:8765/"
 PORT = 8766
 
@@ -565,6 +649,8 @@ class Handler(BaseHTTPRequestHandler):
                 if set(query) - {"condition_id"} or len(query.get("condition_id", [])) > 1:
                     raise ValueError("observed query accepts one condition_id only")
                 self._json(200, _observed_response(query.get("condition_id", [None])[0]))
+            elif parsed.path == "/api/coupled-arena" and not parsed.query and COUPLED_ARENA is not None:
+                self._json(200, COUPLED_ARENA)
             elif parsed.path == "/api/session.json" and not parsed.query:
                 self._json(200, SESSION.session_export(), attachment="cellsim-session.json")
             else:
@@ -779,13 +865,14 @@ PAGE = PAGE.replace("</header>",
                     '<div class="demo-guide-top"><strong>Live demo guide · 2-minute path</strong>'
                     '<span id="guide-readiness" class="demo-guide-readiness" role="status"></span></div>'
                     '<p class="demo-guide-steps">0:00 Choose 1, 3 or 5 identified cell instances sharing a field. '
-                    '0:20 Run the paired 82-step NF-κB schedule preset. '
-                    '0:40 Click a pixel cell to inspect its state. '
+                    '0:20 Run the separate 82-step paired comparison. '
+                    '0:40 Press Step to animate the live pixel state, then click a cell to inspect it. '
                     '1:00 Browse <a href="#observed-panel">measured p65</a> and the frozen early fit. '
                     '1:20 Open the campaign review when linked. '
                     '1:40 Inspect <a href="#learning-section">learner iterations</a> and '
                     '<a href="#ledger-section">Ocura OSS evidence</a>. '
-                    'Synthetic state and delivery are separate from measured reporter traces.</p>'
+                    'Synthetic state and delivery are separate from measured reporter traces.'
+                    '<span id="coupled-guide-link"></span></p>'
                     '<div class="demo-guide-presets"><span>Reset synthetic NF-κB:</span>'
                     '<button type="button" data-cell-preset="1">1 cell</button>'
                     '<button type="button" data-cell-preset="3">3 cells</button>'
@@ -804,6 +891,7 @@ let state = null;
 let observedIndex = null, observedCondition = null;
 let nfkbComparison = null;
 let predictorResult = null;
+let coupledArena = null;
 const $ = id => document.getElementById(id);
 const fmt = value => value === null || value === undefined ? "—" :
   typeof value === "number" ? (Number.isFinite(value) ? Number(value).toPrecision(6).replace(/\.?0+$/, "") : "—") : String(value);
@@ -1087,6 +1175,86 @@ function renderComparison() {
   pairedChart($("compare-reporter"),a.observations,b.observations,select.value,"reporter_index",[0,120,240,360],nfkbComparison.schedule.sequence_key);
   pairedChart($("compare-nuclear"),a.observations,b.observations,select.value,"nuclear_proxy",[0,120,240,360],nfkbComparison.schedule.sequence_key);
 }
+function coupledPanel() {
+  let panel=$("coupled-panel");if(panel)return panel;
+  panel=node("section");panel.id="coupled-panel";
+  panel.append(node("h2","Coupled 3-cell arena · preserved run"),
+    node("p","Read-only matched synthetic baseline and mediator-coupled trajectories. A finite generic mediator is secreted, cleared, and sensed on the next interval; this is neither measured p65 nor the editable live episode.","muted"));
+  const controls=node("div",undefined,"row"),label=node("label","Inspect modeled cell"),select=node("select");
+  select.id="coupled-cell";label.append(select);controls.append(label);
+  const timeLabel=node("label","Preserved sample (0–492 min)"),slider=node("input");
+  slider.id="coupled-sample";slider.type="range";slider.min="0";slider.max="82";slider.step="1";slider.value="21";
+  timeLabel.append(slider);controls.append(timeLabel);panel.append(controls);
+  const cards=node("div");cards.id="coupled-summary";cards.className="evidence-grid";panel.append(cards);
+  const scene=node("canvas");scene.id="coupled-scene";scene.width=800;scene.height=185;
+  scene.style.width="100%";scene.style.height="auto";scene.setAttribute("aria-label","Preserved coupled mediator field and identified cell sprites");panel.append(scene);
+  for(const [id,label] of [["coupled-field","Generic mediator field concentration (mol/m³)"],
+                           ["coupled-nuclear","Illustrative nuclear proxy (1)"],
+                           ["coupled-reporter","Illustrative reporter index (1)"]]){
+    const box=node("div",undefined,"metric");box.append(node("h3",label));
+    const canvas=node("canvas");canvas.id=id;canvas.width=800;canvas.height=185;canvas.style.width="100%";canvas.style.height="auto";
+    box.append(canvas);panel.append(box);}
+  panel.append(node("p","Blue: matched baseline; cyan: generic mediator coupling. All three plots are synthetic. The measured p65 chart below and the frozen empirical reporter fit have separate provenance and units.","note"));
+  $("trace-body").closest("section").before(panel);
+  select.addEventListener("change",renderCoupled);slider.addEventListener("input",renderCoupled);
+  return panel;
+}
+function pairedArtifactChart(canvas,baseline,coupled,accessor) {
+  const ctx=canvas.getContext("2d"),w=canvas.width,h=canvas.height;
+  ctx.clearRect(0,0,w,h);ctx.fillStyle="#0d1b2b";ctx.fillRect(0,0,w,h);
+  const a=baseline.map(accessor),b=coupled.map(accessor),hi=Math.max(1e-9,...a,...b);
+  const x=i=>42+i*(w-66)/Math.max(1,a.length-1),y=v=>h-27-Number(v)/hi*(h-62);
+  ctx.strokeStyle="#52677d";ctx.beginPath();ctx.moveTo(42,h-27);ctx.lineTo(w-20,h-27);ctx.stroke();
+  ctx.font="12px system-ui";ctx.fillStyle="#d7e8f6";ctx.fillText("0",14,h-27);ctx.fillText(fmt(hi),6,37);
+  ctx.fillText(fmt(coupled.at(-1).time_min)+" min",w-77,h-6);
+  const line=(values,color)=>{ctx.strokeStyle=color;ctx.lineWidth=3;ctx.beginPath();
+    values.forEach((value,i)=>i?ctx.lineTo(x(i),y(value)):ctx.moveTo(x(i),y(value)));ctx.stroke();};
+  line(a,"#80aaf9");line(b,"#69dfe5");
+}
+function drawCoupledScene(canvas,sample,maximumConcentration,selectedId) {
+  const ctx=canvas.getContext("2d"),w=canvas.width,h=canvas.height;
+  const fraction=Math.min(1,sample.mediator_field_concentration_mol_m3/Math.max(maximumConcentration,1e-12));
+  ctx.fillStyle=`rgb(${Math.round(10+12*fraction)},${Math.round(31+86*fraction)},${Math.round(45+99*fraction)})`;
+  ctx.fillRect(0,0,w,h);ctx.strokeStyle="#69dfe5";ctx.lineWidth=3;ctx.strokeRect(8,8,w-16,h-16);
+  ctx.fillStyle="#e9f6fa";ctx.font="bold 13px Consolas,monospace";
+  ctx.fillText(`GENERIC MEDIATOR · ${fmt(sample.mediator_field_concentration_mol_m3)} mol/m³ · ${fmt(sample.time_min)} min`,20,29);
+  const cells=sample.cells,xs=cells.map(c=>c.position_m[0]),ys=cells.map(c=>c.position_m[1]);
+  const xlo=Math.min(...xs),xspan=Math.max(...xs)-xlo,ylo=Math.min(...ys),yspan=Math.max(...ys)-ylo;
+  for(const cell of cells){const x=190+(xspan?(cell.position_m[0]-xlo)/xspan:0.5)*410;
+    const y=57+(yspan?(cell.position_m[1]-ylo)/yspan:0.5)*62;
+    ctx.fillStyle=cell.cell_id===selectedId?"#ffd178":"#79dfbd";ctx.fillRect(x-15,y-15,30,30);
+    ctx.strokeStyle="#07111b";ctx.lineWidth=3;ctx.strokeRect(x-15,y-15,30,30);
+    ctx.fillStyle="#e9f6fa";ctx.font="12px Consolas,monospace";
+    ctx.fillText(`${cell.cell_id} N ${fmt(cell.nuclear_proxy)} R ${fmt(cell.reporter_index)}`,x-70,y+49);}
+  ctx.font="11px Consolas,monospace";ctx.fillStyle="#c3d9e5";
+  ctx.fillText("Position from preserved synthetic result · selected cell in gold · field tint follows mediator concentration",20,h-14);
+}
+function renderCoupled() {
+  if(!state.coupled_arena_available)return;
+  const panel=coupledPanel(),cards=$("coupled-summary");cards.replaceChildren();
+  if(!coupledArena){evidenceCard(cards,"Coupled artifact","loading verified local result");return;}
+  const baseline=coupledArena.cases.baseline.trace,coupled=coupledArena.cases.coupled.trace;
+  const select=$("coupled-cell"),old=select.value;if(!select.options.length){
+    for(const cell of coupled[0].cells){const option=node("option",cell.cell_id);option.value=cell.cell_id;select.append(option);}}
+  select.value=coupled[0].cells.some(c=>c.cell_id===old)?old:coupled[0].cells[0].cell_id;
+  const cellId=select.value,slider=$("coupled-sample");slider.max=String(coupled.length-1);
+  const sample=coupled[Number(slider.value)],cell=sample.cells.find(c=>c.cell_id===cellId);
+  evidenceCard(cards,"Preserved step",`${fmt(sample.time_min)} min · ${cellId}`);
+  evidenceCard(cards,"Mediator field / waste (mol)",`${fmt(sample.mediator_field_amount_mol)} / ${fmt(sample.mediator_waste_amount_mol)}`);
+  evidenceCard(cards,"Selected nuclear / reporter (1)",`${fmt(cell.nuclear_proxy)} / ${fmt(cell.reporter_index)}`);
+  evidenceCard(cards,"Selected mediator inventory (mol)",cell.mediator_inventory_mol);
+  evidenceCard(cards,"Cell 3 second-interval nuclear difference",coupledArena.comparison.cell_3_second_interval_nuclear_delta);
+  evidenceCard(cards,"Selected reporter AUC difference (index·min)",
+    coupledArena.comparison.delta_auc_reporter_index_min_by_cell?.[cellId]);
+  evidenceCard(cards,"Maximum amount residual (mol)",coupledArena.maximum_amount_residual_mol);
+  evidenceCard(cards,"Verified OSS atom / chokepoint",`${coupledArena.oss_atom_id} / ${coupledArena.oss_chokepoint_id}`);
+  evidenceCard(cards,"Result SHA-256",coupledArena.result_sha256);
+  evidenceCard(cards,"Preserved result",coupledArena.artifact_path);
+  pairedArtifactChart($("coupled-field"),baseline,coupled,row=>row.mediator_field_concentration_mol_m3);
+  pairedArtifactChart($("coupled-nuclear"),baseline,coupled,row=>row.cells.find(c=>c.cell_id===cellId).nuclear_proxy);
+  pairedArtifactChart($("coupled-reporter"),baseline,coupled,row=>row.cells.find(c=>c.cell_id===cellId).reporter_index);
+  drawCoupledScene($("coupled-scene"),sample,Math.max(...coupled.map(row=>row.mediator_field_concentration_mol_m3)),cellId);
+}
 function renderSymbolic() {
   const p=state.symbolic_program, e=state.evidence.symbolic||{}, box=$("symbolic-summary");box.replaceChildren();
   evidenceCard(box,"Statements",(p.statements||[]).map(s=>s.kind).join(" + "));
@@ -1212,8 +1380,11 @@ function renderGuide() {
   const count=state.configuration.cell_count || 1;
   const observedCount=observedIndex?.status==="available" ? observedIndex.conditions.length : 0;
   $("guide-readiness").textContent=`OSS ${state.recording_available?"ready":"unavailable"} · measured overlay ${observedCount?observedCount+" conditions":"unavailable"} · campaign ${state.campaign_report_available?"linked":"unavailable"} · ${count} cell${count===1?"":"s"} · ${state.accepted_steps}/${state.configuration.horizon_steps} steps`;
+  const link=$("coupled-guide-link");link.replaceChildren();
+  if(state.coupled_arena_available){link.append(document.createTextNode(" · Explore the preserved "));
+    const anchor=node("a","coupled 3-cell arena");anchor.href="#coupled-panel";link.append(anchor);}
 }
-function render() { renderState();renderTrace();renderCharts();renderComparison();renderObserved();renderSymbolic();renderLearning();renderEvidence();renderGuide(); }
+function render() { renderState();renderTrace();renderCharts();renderComparison();renderCoupled();renderObserved();renderSymbolic();renderLearning();renderEvidence();renderGuide(); }
 function message(id,text,bad=false) { const el=$(id);el.textContent=text;el.className="status-line "+(bad?"bad":"good"); }
 function numericInput(input,label,integer=false) {
   if (!input || input.value.trim()==="") throw new Error(label+" cannot be blank");
@@ -1224,6 +1395,8 @@ function numericInput(input,label,integer=false) {
 }
 function redrawSceneAfterLayout(){requestAnimationFrame(()=>{if(state)renderScene();});}
 async function load() {state=await api("/api/state");renderModes();render();redrawSceneAfterLayout();
+  if(state.coupled_arena_available)try{coupledArena=await api("/api/coupled-arena");renderCoupled();}
+    catch(error){const panel=coupledPanel();panel.append(node("p",error.message,"status-line bad"));}
   try{observedIndex=await api("/api/observed");if(observedIndex.status==="available")
     observedCondition=await api("/api/observed?condition_id="+observedIndex.conditions[0].condition_id);
     renderObserved();renderGuide();redrawSceneAfterLayout();}catch(error){observedPanel();$("observed-note").textContent=error.message;renderGuide();}}
@@ -1270,7 +1443,7 @@ load().catch(error=>message("config-error",error.message,true));
 
 
 def main() -> int:
-    global SESSION, ENGINE_CLI, OSS_CLI, RUN_PYTHON, OBSERVED, RESIDUAL, FROZEN, CAMPAIGN_HTML, BOARD_URL, PORT
+    global SESSION, ENGINE_CLI, OSS_CLI, RUN_PYTHON, OBSERVED, RESIDUAL, FROZEN, CAMPAIGN_HTML, COUPLED_ARENA, BOARD_URL, PORT
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", type=int, default=8766, help="loopback port, default 8766")
     parser.add_argument("--run", type=Path, help="specific integrated run directory or result/receipt JSON")
@@ -1280,6 +1453,8 @@ def main() -> int:
                         help="fixed installed Ocura Engine CLI for optional one-click ledger replay")
     parser.add_argument("--campaign-report", type=Path,
                         help="existing standalone HTML report to serve read-only at /campaign")
+    parser.add_argument("--coupled-arena-result", type=Path,
+                        help="one completed coupled synthetic arena results.json with adjacent verified OSS record")
     parser.add_argument("--board-url", default=BOARD_URL,
                         help="loopback agent board root URL; default http://127.0.0.1:8765/")
     args = parser.parse_args()
@@ -1317,6 +1492,11 @@ def main() -> int:
     OSS_CLI = oss_selected
     RUN_PYTHON = run_python
     CAMPAIGN_HTML = campaign_bytes
+    try:
+        COUPLED_ARENA = (_load_coupled_arena(args.coupled_arena_result)
+                         if args.coupled_arena_result is not None else None)
+    except (OSError, ValueError) as exc:
+        parser.error(str(exc))
     BOARD_URL = board_url
     OBSERVED = _observed_artifact()
     frozen_path = ROOT / "runs/nfkb_model_20260926_02/frozen_candidate.json"

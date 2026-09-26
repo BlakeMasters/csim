@@ -214,6 +214,53 @@ class InteractiveDemoTests(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 demo._validate_board_url(bad)
 
+    def test_coupled_arena_artifact_is_hash_bound_and_read_only(self):
+        with tempfile.TemporaryDirectory() as scratch:
+            result_path = Path(scratch) / "results.json"
+            cells = [{"cell_id": f"cell_{i}", "model_id": f"model:{i}",
+                      "position_m": [i * 0.1, 0.1, 0.1], "nuclear_proxy": 0.1,
+                      "feedback": 0.0, "reporter_index": 0.0,
+                      "mediator_inventory_mol": 0.01} for i in range(1, 4)]
+            trace = [{"time_min": time, "stimulus_code": "T",
+                      "mediator_field_amount_mol": 0.0001 * index,
+                      "mediator_field_concentration_mol_m3": 0.0008 * index,
+                      "mediator_waste_amount_mol": 0.0, "cells": cells}
+                     for index, time in enumerate((0.0, 6.0))]
+            payload = {"status": "pass", "source_test_tool_sha256": "source-hash",
+                       "configuration": {"cell_count": 3, "seed": 7, "sequence_key": "TIPL",
+                                         "horizon_steps": 1, "step_min": 6},
+                       "cases": {name: {"trace": trace, "accepted_steps": 1}
+                                 for name in ("baseline", "coupled")},
+                       "comparison": {"same_seed": True, "same_stimulus_schedule": True,
+                                      "cell_3_second_interval_nuclear_delta": 0.0},
+                       "maximum_amount_residual_mol": 0.0}
+            result_path.write_text(json.dumps(payload), encoding="utf-8")
+            receipt = {"status": "passed", "atom_id": "atom-test", "chokepoint_id": "cp-test",
+                       "verification": {"status": "ok", "logs_checked": 2, "problems": []},
+                       "results_sha256": hashlib.sha256(result_path.read_bytes()).hexdigest(),
+                       "source_test_tool_sha256": "source-hash"}
+            sidecar = result_path.with_name("oss_record.json")
+            sidecar.write_text(json.dumps(receipt), encoding="utf-8")
+            loaded = demo._load_coupled_arena(result_path)
+            self.assertEqual(loaded["oss_atom_id"], "atom-test")
+            self.assertEqual(len(loaded["cases"]["coupled"]["trace"]), 2)
+            session = demo.DemoSession(None)
+            with patch.object(demo, "COUPLED_ARENA", loaded), patch.object(demo, "SESSION", session):
+                self.assertTrue(session.snapshot()["coupled_arena_available"])
+                server = ThreadingHTTPServer(("127.0.0.1", 0), demo.Handler)
+                worker = threading.Thread(target=server.serve_forever, daemon=True)
+                worker.start()
+                try:
+                    with patch.object(demo, "PORT", server.server_port):
+                        with urlopen(f"http://127.0.0.1:{server.server_port}/api/coupled-arena") as response:
+                            self.assertEqual(json.load(response)["oss_atom_id"], "atom-test")
+                finally:
+                    server.shutdown(); server.server_close(); worker.join(timeout=2)
+            receipt["results_sha256"] = "wrong"
+            sidecar.write_text(json.dumps(receipt), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "SHA-256"):
+                demo._load_coupled_arena(result_path)
+
     def test_campaign_route_serves_only_configured_read_only_html(self):
         with tempfile.TemporaryDirectory() as scratch:
             report = Path(scratch) / "index.html"
