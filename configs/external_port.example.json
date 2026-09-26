@@ -1,0 +1,16 @@
+{
+  "port_id": "source_to_grid",
+  "owner_id": "example_reservoir",
+  "interface_version": "2",
+  "quantity_type": "amount_rate",
+  "unit": "mol/s",
+  "species_or_material_id": "tracer",
+  "compartment_or_mesh_id": "boundary-face",
+  "orientation": "inward-positive",
+  "time_interval_s": [
+    0.0,
+    1.0
+  ],
+  "balance_account": "external-reservoir",
+  "status": "design_example_only"
+}

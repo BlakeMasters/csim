@@ -1,0 +1,27 @@
+id,claim,verdict,v2_action,v2_document,new_biological_evidence
+C01,Solver-independent canonical state has precedent,supported_with_limits,Shared/private state replaces universal-state sufficiency.,docs/ARCHITECTURE.md,False
+C02,Discrete cells plus continuum fields is established,supported,"Hybrid cell/field model retained as planned biological structure, not implemented 3D environment.",docs/ARCHITECTURE.md,False
+C03,Multirate scheduling is appropriate,supported_with_limits,Explicit window/subcycling reference; no general multirate accuracy claim.,docs/NUMERICAL_CONTRACTS.md,False
+C04,preCICE makes selected packages readily integrable,overstated,Offline adapters first; live preCICE integration remains a build task.,docs/BACKEND_INTEGRATION.md,False
+C05,SOFA and ESPResSo are high-fidelity biological oracles,unsupported_as_general_claim,Oracle terminology removed; each comparator requires matched model and convergence.,docs/BACKEND_INTEGRATION.md,False
+C06,Tissue Forge offers an independent reference,conditional,"Tissue Forge remains a candidate comparator, not an executed independent reference.",docs/BACKEND_INTEGRATION.md,False
+C07,932/1055 BioModels matched across at least two engines,verified_scope_restricted,ODE cross-engine result preserved at its original scope; not extrapolated to spatial physics.,docs/SOURCES.md,False
+C08,FDA/ASME credibility methods directly justify the proposed ML/fidelity layer,scope_overextended,No regulatory approval or ML qualification inferred.,docs/OPERATIONS.md,False
+C09,Surrogate distillation is feasible,supported_with_limits,Surrogate feasibility is a later experiment; no model trained.,docs/FIDELITY_RESEARCH.md,False
+C10,Mean discrepancy plus lambda uncertainty gives a guarantee,unproven,Error-plus-uncertainty guarantee withdrawn; empirical/coverage requirements specified.,docs/FIDELITY_RESEARCH.md,False
+C11,Regional multi-fidelity cellular simulation is novel,not_established,No novelty claim; dedicated prior-art and implementation evaluation required.,docs/FIDELITY_RESEARCH.md,False
+C12,Four-population vascularized spheroids demonstrate functional spheroid perfusion,incorrect_extension,Spheroid morphology and in-vivo perfusion remain distinct measurements.,docs/BIOLOGICAL_VALIDATION.md,False
+C13,Vascularized-organoid paper validates tumor therapy,incorrect_extension,Non-cancer organoid platform is vascular-engineering precedent only.,docs/BIOLOGICAL_VALIDATION.md,False
+C14,Renal tumor chip supplies useful component data,supported_with_limits,Renal chip target restricted to measured tracer/bead/vascular endpoints.,docs/BIOLOGICAL_VALIDATION.md,False
+C15,The ABC paper provides broad evidence for tumor-model calibration,supported_but_narrower,ABC example kept conditional on its model/data and identity caveats.,docs/BIOLOGICAL_VALIDATION.md,False
+C16,SBML/SED-ML/OMEX fully specify the proposed world,overstated,Custom ZIP is not OMEX; standard support requires actual feature/round-trip tests.,docs/ARCHITECTURE.md,False
+C17,Warp is the best or biologically credible production backend,unverified,Warp optional; no selection as fastest or biologically preferred.,docs/BACKEND_INTEGRATION.md,False
+C18,The packaged example realizes the proposed vascularized microtumor experiment,proposal_not_implementation,Example renamed synthetic bookkeeping; microtumor is nonrunnable proposal.,docs/MIGRATION.md,False
+C19,The four passing tests establish scaffold correctness beyond smoke testing,original_count_verified_but_insufficient,Selected regression and numerical evidence reported with explicit limits.,docs/KNOWN_LIMITATIONS.md,False
+C20,Total error is a simple sum of independent uncertainties,not_justified,Error categories distinguished; no unjustified independence assumption.,docs/NUMERICAL_CONTRACTS.md,False
+C21,Local solver escalation ensures global trajectory accuracy,unproven,Conditional accumulation bound and switching errors stated; no runtime guarantee.,docs/NUMERICAL_CONTRACTS.md,False
+C22,Increasing detail monotonically improves biological realism,unsupported,Observable-specific model portfolio replaces monotonic realism ladder.,docs/FIDELITY_RESEARCH.md,False
+C23,Arbitrary external entities can be physically predicted,conditional,Externals require typed inputs and justified response laws.,docs/EXTERNALS.md,False
+C24,A validated constitutive law transfers across cell populations,unproven,"Cell identity, calibration and applicability required before population transfer.",docs/BIOLOGICAL_VALIDATION.md,False
+C25,Detailed mechanics and nuclear deformation have experimental relevance,supported_in_specific_contexts,"Mechanics evidence motivates scoped later experiments, not blanket detailed modeling.",docs/BIOLOGICAL_VALIDATION.md,False
+C26,Mechanical strain can be converted to universal rupture or mutation thresholds,not_established,Universal strain/rupture thresholds removed; biological threshold fields remain unset.,docs/BIOLOGICAL_VALIDATION.md,False

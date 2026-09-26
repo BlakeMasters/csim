@@ -1,0 +1,29 @@
+{
+  "schema_version": "2",
+  "status": "planned",
+  "runnable": false,
+  "dataset_id": null,
+  "role": null,
+  "source_doi_or_accession": null,
+  "raw_artifacts": [],
+  "sha256": null,
+  "reuse_terms": null,
+  "cell_identity": {
+    "name": null,
+    "resource_id": null,
+    "authentication_evidence": null
+  },
+  "experimental_unit": null,
+  "batch_or_donor": null,
+  "protocol_ref": null,
+  "intervention": null,
+  "units": null,
+  "acquisition_times": null,
+  "observation_operator_ref": null,
+  "processing_code_hash": null,
+  "uncertainty_ref": null,
+  "exclusions": [],
+  "split_assignment": null,
+  "split_locked_before_fitting": false,
+  "biological_validation": false
+}

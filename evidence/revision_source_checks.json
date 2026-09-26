@@ -1,0 +1,62 @@
+{
+  "date": "2026-09-17",
+  "scope": "Targeted documentary refresh while rebuilding; not a repeat of the entire literature audit.",
+  "checks": [
+    {
+      "inherited_id": "S01",
+      "url": "https://academic.oup.com/bioinformatics/article/38/7/1972/6522109",
+      "inspection": "Primary paper page reopened; modular state/process precedent. No new universal-state inference."
+    },
+    {
+      "inherited_id": "S05",
+      "url": "https://precice.org/adapters-overview.html",
+      "inspection": "Official catalog inspected. SOFA, ESPResSo and Tissue Forge not listed. This is not an exhaustive search for external adapters."
+    },
+    {
+      "inherited_id": "S06",
+      "url": "https://precice.org/couple-your-code-implicit-coupling.html",
+      "inspection": "Official implicit-coupling workflow and participant-provided complete checkpoint/repeatability requirements inspected."
+    },
+    {
+      "inherited_id": "S07",
+      "url": "https://precice.org/configuration-mapping.html",
+      "inspection": "Official mapping definitions inspected; global-sum preservation distinguished from other interface invariants."
+    },
+    {
+      "inherited_id": "S09",
+      "url": "https://www.fda.gov/regulatory-information/search-fda-guidance-documents/assessing-credibility-computational-modeling-and-simulation-medical-device-submissions",
+      "inspection": "FDA landing page reopened, confirming first-principles/mechanistic device-submission scope. Detailed PDF exclusions are inherited from the supplied audit, not re-audited in this build."
+    },
+    {
+      "inherited_id": "S22",
+      "url": "https://www.sofa-framework.org/about/features/",
+      "inspection": "Official mechanics capabilities and representation mapping reviewed. No engine installed or material law calibrated."
+    },
+    {
+      "inherited_id": "S23",
+      "url": "https://espressomd.github.io/doc/object_in_fluid.html",
+      "inspection": "Official elastic-object API/mechanical terms reviewed. No fluid benchmark executed."
+    },
+    {
+      "inherited_id": "S24",
+      "url": "https://tissue-forge-documentation.readthedocs.io/en/latest/models/vertex/solver/solver.html",
+      "inspection": "Official vertex/surface/body description revisited. Model capabilities are not a guarantee of required 3D topology behavior."
+    },
+    {
+      "inherited_id": "S25",
+      "url": "https://nvidia.github.io/warp/stable/",
+      "inspection": "Official stable documentation reviewed for CPU/GPU kernels and numerical primitives. No GPU build or version combination tested."
+    },
+    {
+      "inherited_id": "S27",
+      "url": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010833",
+      "inspection": "Primary paper page reopened as candidate oxygen-perturbation study. No data acquired or numerical reproduction performed."
+    }
+  ],
+  "failed_fetches": [
+    {
+      "url": "https://nvidia.github.io/warp/installation.html",
+      "outcome": "404; replaced by official stable documentation index"
+    }
+  ]
+}

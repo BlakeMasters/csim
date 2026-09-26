@@ -1,0 +1,16 @@
+{
+  "scope": "shape only, no biological or runtime semantics",
+  "jsonschema_version": "4.26.0",
+  "records": [
+    {
+      "schema": "credibility_case.schema.json",
+      "instance": "credibility_case.template.json",
+      "outcome": "pass"
+    },
+    {
+      "schema": "external_port.schema.json",
+      "instance": "external_port.example.json",
+      "outcome": "pass"
+    }
+  ]
+}

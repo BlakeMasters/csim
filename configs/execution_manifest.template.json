@@ -1,0 +1,31 @@
+{
+  "schema_version": "2",
+  "status": "planned",
+  "runnable": false,
+  "execution_id": null,
+  "model_hash": null,
+  "parameters_hash": null,
+  "code_hash": null,
+  "mesh_hash": null,
+  "observation_hash": null,
+  "intervention_hash": null,
+  "process_order": [],
+  "solver_configs": [],
+  "coupling_config": null,
+  "rng_policy": null,
+  "checkpoint_refs": [],
+  "environment": null,
+  "costs": {
+    "reference_generation_seconds": null,
+    "training_seconds": null,
+    "inference_seconds": null,
+    "evaluation_seconds": null,
+    "mapping_seconds": null,
+    "failed_attempt_seconds": null,
+    "persistence_seconds": null,
+    "cold_start_seconds": null,
+    "peak_memory_bytes": null
+  },
+  "output_hashes": [],
+  "qualified_for": []
+}

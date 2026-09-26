@@ -1,0 +1,28 @@
+{
+  "schema_version": "1",
+  "dataset_id": "synthetic-cell-field-v1",
+  "species": "synthetic_tracer",
+  "parameter_provenance": "Synthetic dimensioned engineering fixture; no measured biological parameters.",
+  "grid": {
+    "x_widths_m": [0.25, 0.25, 0.25, 0.25],
+    "y_widths_m": [0.25, 0.25, 0.25],
+    "z_widths_m": [0.25, 0.25],
+    "origin_m": [0.0, 0.0, 0.0]
+  },
+  "diffusivity_m2_s": 0.01,
+  "dt_s": 0.05,
+  "steps": 8,
+  "process_order": ["uptake", "diffusion"],
+  "cells": [
+    {"id": "cell-a", "voxel": 5, "volume_m3": 0.001, "vmax_mol_s": 0.001, "km_mol_m3": 0.5},
+    {"id": "cell-b", "voxel": 18, "volume_m3": 0.001, "vmax_mol_s": 0.002, "km_mol_m3": 0.5}
+  ],
+  "conditions": [
+    {"id": "train-low", "split": "train", "initial_concentration_mol_m3": 0.5, "boundary_inward_mol_m2_s": 0.0, "boundary_start_step": 0},
+    {"id": "train-high", "split": "train", "initial_concentration_mol_m3": 1.0, "boundary_inward_mol_m2_s": 0.0, "boundary_start_step": 0},
+    {"id": "train-pulse", "split": "train", "initial_concentration_mol_m3": 0.7, "boundary_inward_mol_m2_s": 0.005, "boundary_start_step": 4},
+    {"id": "validation-pulse", "split": "validation", "initial_concentration_mol_m3": 0.85, "boundary_inward_mol_m2_s": 0.003, "boundary_start_step": 4},
+    {"id": "test-high-pulse", "split": "test", "initial_concentration_mol_m3": 1.2, "boundary_inward_mol_m2_s": 0.008, "boundary_start_step": 4},
+    {"id": "test-low", "split": "test", "initial_concentration_mol_m3": 0.4, "boundary_inward_mol_m2_s": 0.0, "boundary_start_step": 0}
+  ]
+}

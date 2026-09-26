@@ -1,0 +1,99 @@
+{
+  "status": "pass",
+  "biological_validation": false,
+  "tolerances": "Engineering regression limits for these synthetic cases only.",
+  "decay": {
+    "equation": "dc/dt=-0.7 c, c(0)=1, T=1",
+    "rows": [
+      {
+        "dt": 0.2,
+        "steps": 5,
+        "absolute_error": 0.026158286191409585
+      },
+      {
+        "dt": 0.1,
+        "steps": 10,
+        "absolute_error": 0.012602996612116169
+      },
+      {
+        "dt": 0.05,
+        "steps": 20,
+        "absolute_error": 0.0061900402983519065
+      },
+      {
+        "dt": 0.025,
+        "steps": 40,
+        "absolute_error": 0.0030680257777071507
+      }
+    ],
+    "observed_orders": [
+      1.0535012192541915,
+      1.0257460970344299,
+      1.0126381972038914
+    ]
+  },
+  "periodic_diffusion": {
+    "equation": "c_t=0.2 c_xx; c(x,0)=1+0.25 sin(2 pi x), L=1,T=.05",
+    "study": "Joint dx,dt refinement with dt proportional to dx^2; not an isolated spatial-order proof.",
+    "rows": [
+      {
+        "n": 16,
+        "dx": 0.0625,
+        "dt": 0.0019230769230769232,
+        "steps": 26,
+        "l2_error": 0.0002500265492795051,
+        "mass_error": 0.0
+      },
+      {
+        "n": 32,
+        "dx": 0.03125,
+        "dt": 0.00048543689320388353,
+        "steps": 103,
+        "l2_error": 6.113090299959591e-05,
+        "mass_error": 2.220446049250313e-16
+      },
+      {
+        "n": 64,
+        "dx": 0.015625,
+        "dt": 0.00012195121951219514,
+        "steps": 410,
+        "l2_error": 1.5140901900650879e-05,
+        "mass_error": 2.220446049250313e-16
+      }
+    ],
+    "observed_orders": [
+      2.0321075135603284,
+      2.013450732993773
+    ]
+  },
+  "radial_steady": {
+    "equation": "D Laplacian(c)-q=0, c(R)=cb; D=R=cb=1,q=.3",
+    "rows": [
+      {
+        "n": 8,
+        "max_error": 0.0001953125000010436,
+        "minimum_concentration": 0.949999999999999
+      },
+      {
+        "n": 16,
+        "max_error": 4.8828125001620926e-05,
+        "minimum_concentration": 0.9499999999999984
+      },
+      {
+        "n": 32,
+        "max_error": 1.220703125637268e-05,
+        "minimum_concentration": 0.9499999999999936
+      },
+      {
+        "n": 64,
+        "max_error": 3.0517578268884904e-06,
+        "minimum_concentration": 0.9499999999999856
+      }
+    ],
+    "observed_orders": [
+      1.9999999999598161,
+      1.9999999992947337,
+      1.9999999939511106
+    ]
+  }
+}

@@ -1,0 +1,2 @@
+# Preserve file bytes across platforms for the recorded SHA-256 manifests.
+* -text

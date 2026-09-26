@@ -1,0 +1,55 @@
+{
+  "schema_version": "2",
+  "biological_validation": false,
+  "cases": [
+    {
+      "id": "NUM-01",
+      "name": "Euler decay",
+      "status": "implemented_numerical",
+      "command": "python tools/numerical_checks.py",
+      "result_key": "decay"
+    },
+    {
+      "id": "NUM-02",
+      "name": "Periodic diffusion mode",
+      "status": "implemented_numerical",
+      "command": "python tools/numerical_checks.py",
+      "result_key": "periodic_diffusion"
+    },
+    {
+      "id": "NUM-03",
+      "name": "Steady radial constant uptake",
+      "status": "implemented_numerical",
+      "command": "python tools/numerical_checks.py",
+      "result_key": "radial_steady"
+    },
+    {
+      "id": "COMP-01",
+      "name": "Matched specialist mechanics/transport problem",
+      "status": "planned",
+      "command": null
+    },
+    {
+      "id": "BIO-01",
+      "name": "Oxygen-perturbation spheroid holdout",
+      "status": "planned",
+      "command": null,
+      "source_ids": [
+        "S26",
+        "S27"
+      ]
+    },
+    {
+      "id": "COUP-01",
+      "name": "Fixed-topology live coupling",
+      "status": "planned",
+      "command": null
+    },
+    {
+      "id": "FID-01",
+      "name": "Offline cost-error policy comparison",
+      "status": "planned",
+      "command": null
+    }
+  ]
+}

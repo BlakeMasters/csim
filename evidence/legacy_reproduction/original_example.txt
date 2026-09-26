@@ -1,0 +1,5 @@
+time: 1.0
+cells: {'c0': (-0.19862920784586277, 0.0, 0.0), 'c1': (1.5, 0.0, 0.0)}
+phenotypes: {'c0': {'hypoxic': True}, 'c1': {'hypoxic': False}}
+fidelity: F1_DETAILED_NATIVE local state requires detailed native representation
+processes: ['hypoxia_response', 'mechanics', 'transport:oxygen']

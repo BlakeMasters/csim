@@ -1,0 +1,10 @@
+{
+  "label": "synthetic numerical bookkeeping demonstration; not microtumor",
+  "biological_validation": false,
+  "cell_slots_after_division": 3,
+  "amount_before_mol": 10.0,
+  "amount_after_mol": 10.0,
+  "volume_change_m3": 0.0,
+  "checkpoint_roundtrip_equal": true,
+  "final_state_sha256": "7ced7f5ec1608ad9d081777fe4ae84c61262a9395664c215d880fe4fa9e1af78"
+}

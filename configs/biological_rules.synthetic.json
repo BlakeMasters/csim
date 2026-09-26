@@ -1,0 +1,38 @@
+{
+  "schema_version": "1",
+  "id": "synthetic-low-signal-gated-transfer",
+  "runnable": true,
+  "execution_mode": "synthetic",
+  "context": {
+    "cell_identity": null,
+    "tissue": null,
+    "scope": "Dimensioned engineering example of a switch and conservative transfer; no biological cell identity or measured response."
+  },
+  "source_refs": [],
+  "rules": [
+    {
+      "id": "low_signal",
+      "kind": "concentration_switch",
+      "cell_ids": ["cell-a"],
+      "species": "synthetic_tracer",
+      "parameters": {
+        "on_below": {"value": 0.5, "unit": "mol/m^3", "provenance": "synthetic", "source_ref": null, "uncertainty": null},
+        "off_above": {"value": 0.8, "unit": "mol/m^3", "provenance": "synthetic", "source_ref": null, "uncertainty": null}
+      },
+      "initial_state": "off",
+      "description": "Annotate a low-signal state with separate entry and exit thresholds; this is a numerical state machine."
+    },
+    {
+      "id": "gated_transfer",
+      "kind": "saturable_transfer",
+      "cell_ids": ["cell-a"],
+      "species": "synthetic_tracer",
+      "parameters": {
+        "vmax": {"value": 0.01, "unit": "mol/s", "provenance": "synthetic", "source_ref": null, "uncertainty": null},
+        "km": {"value": 0.5, "unit": "mol/m^3", "provenance": "synthetic", "source_ref": null, "uncertainty": null}
+      },
+      "gate": {"rule_id": "low_signal", "state": "off"},
+      "description": "Transfer the same tracer species into the cell while the low-signal switch is off; no metabolic consumption."
+    }
+  ]
+}

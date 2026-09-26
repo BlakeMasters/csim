@@ -1,0 +1,98 @@
+{
+  "schema_version": "2",
+  "runnable": false,
+  "candidates": [
+    {
+      "name": "Warp",
+      "role": "optional implementation of already verified kernels",
+      "status": "planned_not_integrated",
+      "runnable": false,
+      "version": null,
+      "commit": null,
+      "compiler": null,
+      "platform": null,
+      "feature_flags": [],
+      "precision": null,
+      "license_review": null,
+      "adapter_source": null,
+      "passing_case_artifacts": [],
+      "source_ids": [
+        "S25"
+      ]
+    },
+    {
+      "name": "SOFA",
+      "role": "mechanics comparator for matched model and observable",
+      "status": "planned_not_integrated",
+      "runnable": false,
+      "version": null,
+      "commit": null,
+      "compiler": null,
+      "platform": null,
+      "feature_flags": [],
+      "precision": null,
+      "license_review": null,
+      "adapter_source": null,
+      "passing_case_artifacts": [],
+      "source_ids": [
+        "S22"
+      ]
+    },
+    {
+      "name": "ESPResSo",
+      "role": "fluid/elastic-object comparator",
+      "status": "planned_not_integrated",
+      "runnable": false,
+      "version": null,
+      "commit": null,
+      "compiler": null,
+      "platform": null,
+      "feature_flags": [],
+      "precision": null,
+      "license_review": null,
+      "adapter_source": null,
+      "passing_case_artifacts": [],
+      "source_ids": [
+        "S23"
+      ]
+    },
+    {
+      "name": "Tissue Forge",
+      "role": "particle/vertex comparator",
+      "status": "planned_not_integrated",
+      "runnable": false,
+      "version": null,
+      "commit": null,
+      "compiler": null,
+      "platform": null,
+      "feature_flags": [],
+      "precision": null,
+      "license_review": null,
+      "adapter_source": null,
+      "passing_case_artifacts": [],
+      "source_ids": [
+        "S24"
+      ]
+    },
+    {
+      "name": "preCICE",
+      "role": "later partitioned-coupling transport, not a biology engine",
+      "status": "planned_not_integrated",
+      "runnable": false,
+      "version": null,
+      "commit": null,
+      "compiler": null,
+      "platform": null,
+      "feature_flags": [],
+      "precision": null,
+      "license_review": null,
+      "adapter_source": null,
+      "passing_case_artifacts": [],
+      "source_ids": [
+        "S05",
+        "S06",
+        "S07"
+      ]
+    }
+  ]
+}

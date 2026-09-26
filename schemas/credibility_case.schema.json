@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "$id": "urn:cellsim-v2:credibility-template",
+  "title": "Unqualified credibility template",
+  "required": [
+    "schema_version",
+    "status",
+    "runnable",
+    "question_ref",
+    "context_of_use_ref",
+    "model_fingerprint",
+    "qoi_ref",
+    "numerical_verification_refs",
+    "independent_comparator_refs",
+    "calibration_refs",
+    "experimental_validation_refs",
+    "uncertainty_model_ref",
+    "applicability_domain_ref",
+    "known_limitations",
+    "reviewer",
+    "review_date",
+    "biological_validation"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "2"
+    },
+    "status": {
+      "const": "unqualified"
+    },
+    "runnable": {
+      "const": false
+    },
+    "question_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "context_of_use_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "model_fingerprint": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "qoi_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "numerical_verification_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "independent_comparator_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "calibration_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "experimental_validation_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "uncertainty_model_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "applicability_domain_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "known_limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "reviewer": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "review_date": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "biological_validation": {
+      "const": false
+    }
+  }
+}

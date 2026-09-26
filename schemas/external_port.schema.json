@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "$id": "urn:cellsim-v2:external-port-template",
+  "title": "Proposed typed effect port",
+  "required": [
+    "port_id",
+    "owner_id",
+    "interface_version",
+    "quantity_type",
+    "unit",
+    "species_or_material_id",
+    "compartment_or_mesh_id",
+    "orientation",
+    "time_interval_s",
+    "balance_account",
+    "status"
+  ],
+  "properties": {
+    "port_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "interface_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "quantity_type": {
+      "enum": [
+        "amount",
+        "amount_rate",
+        "concentration",
+        "force",
+        "traction",
+        "displacement",
+        "event"
+      ]
+    },
+    "unit": {
+      "type": "string",
+      "minLength": 1
+    },
+    "species_or_material_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "compartment_or_mesh_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "orientation": {
+      "type": "string",
+      "minLength": 1
+    },
+    "time_interval_s": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "number",
+          "minimum": 0
+        },
+        {
+          "type": "number",
+          "minimum": 0
+        }
+      ],
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "balance_account": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "const": "design_example_only"
+    }
+  }
+}

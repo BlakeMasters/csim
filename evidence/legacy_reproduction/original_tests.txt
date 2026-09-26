@@ -1,0 +1,9 @@
+test_species_accounting (test_conservation.ConservationTests.test_species_accounting) ... ok
+test_escalation (test_fidelity.FidelityTests.test_escalation) ... ok
+test_multirate_process_executes (test_scheduler.SchedulerTests.test_multirate_process_executes) ... ok
+test_delta_commit (test_state.StateTests.test_delta_commit) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+OK

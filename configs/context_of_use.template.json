@@ -1,0 +1,32 @@
+{
+  "schema_version": "2",
+  "status": "planned",
+  "runnable": false,
+  "question": "Predict a predeclared spheroid observable under a held-out oxygen schedule.",
+  "context_of_use": "Research-only, one authenticated experimental system; not clinical treatment selection.",
+  "cell_system": null,
+  "geometry_model": null,
+  "observation_operator": null,
+  "qoi": {
+    "name": null,
+    "unit": null,
+    "error_norm": null,
+    "required_tolerance": null,
+    "tolerance_justification": null
+  },
+  "model_definition_ref": null,
+  "parameter_fit_ref": null,
+  "calibration_dataset_refs": [],
+  "holdout_dataset_refs": [],
+  "acceptance_plan_ref": null,
+  "source_ids": [
+    "S26",
+    "S27"
+  ],
+  "unresolved": [
+    "data access and terms",
+    "identity/authentication",
+    "observation definitions",
+    "numerical and biological acceptance tolerances"
+  ]
+}

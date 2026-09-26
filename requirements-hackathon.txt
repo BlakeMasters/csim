@@ -1,0 +1,7 @@
+# Tested on Windows 11 with CPython 3.12.6 on 2026-09-26.
+# Optional data inspection and local run ledger; the reference core remains dependency-free.
+numpy==2.2.6
+scipy==1.14.1
+openpyxl==3.1.5
+et-xmlfile==2.0.0
+ocura-oss==0.4.0

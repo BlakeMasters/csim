@@ -1,0 +1,87 @@
+{
+  "tests": 16,
+  "passed": 4,
+  "failures": 12,
+  "errors": 0,
+  "elapsed_seconds": 0.006556275000093592,
+  "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+  "project": "/mnt/data/_legacy_reproduction/20260917T181102Z_ozrlq2rp/extracted/multifidelity_cell_sim_architecture",
+  "records": [
+    {
+      "test": "test_architecture_acceptance.NumericalAndStateRequirements.test_absolute_error_is_nonnegative",
+      "outcome": "FAIL",
+      "detail": "Traceback (most recent call last):\n  File \"/mnt/data/_inputs/audit/cellular_architecture_verification/tests/test_architecture_acceptance.py\", line 96, in test_absolute_error_is_nonnegative\n    self.assertEqual(compare_species(before, after, 'x').absolute_error, 0.5)\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: -0.5 != 0.5\n"
+    },
+    {
+      "test": "test_architecture_acceptance.NumericalAndStateRequirements.test_endpoint_integrates_two_not_three_euler_steps",
+      "outcome": "FAIL",
+      "detail": "Traceback (most recent call last):\n  File \"/mnt/data/_inputs/audit/cellular_architecture_verification/tests/test_architecture_acceptance.py\", line 52, in test_endpoint_integrates_two_not_three_euler_steps\n    self.assertAlmostEqual(w.scalar_fields['x'].values['v'], 0.95**2, places=14)\n    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 0.8573749999999999 != 0.9025 within 14 places (0.04512500000000008 difference)\n"
+    },
+    {
+      "test": "test_architecture_acceptance.NumericalAndStateRequirements.test_equal_isolated_pair_preserves_midpoint",
+      "outcome": "FAIL",
+      "detail": "Traceback (most recent call last):\n  File \"/mnt/data/_inputs/audit/cellular_architecture_verification/tests/test_architecture_acceptance.py\", line 57, in test_equal_isolated_pair_preserves_midpoint\n    self.assertAlmostEqual(midpoint, 0.75, places=14)\n    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 0.7375 != 0.75 within 14 places (0.012499999999999956 difference)\n"
+    },
+    {
+      "test": "test_architecture_acceptance.NumericalAndStateRequirements.test_instantaneous_division_preserves_total_cell_volume",
+      "outcome": "FAIL",
+      "detail": "Traceback (most recent call last):\n  File \"/mnt/data/_inputs/audit/cellular_architecture_verification/tests/test_architecture_acceptance.py\", line 70, in test_instantaneous_division_preserves_total_cell_volume\n    self.assertAlmostEqual(final, initial, places=14)\n    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 2.0 != 1.0 within 14 places (1.0 difference)\n"
+    },
+    {
+      "test": "test_architecture_acceptance.NumericalAndStateRequirements.test_mechanics_invariant_to_entity_iteration_order",
+      "outcome": "FAIL",
+      "detail": "Traceback (most recent call last):\n  File \"/mnt/data/_inputs/audit/cellular_architecture_verification/tests/test_architecture_acceptance.py\", line 62, in test_mechanics_invariant_to_entity_iteration_order\n    self.assertEqual(w1.cells[cid].position, w2.cells[cid].position)\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Tuples differ: (-0.025, 0.0, 0.0) != (0.0, 0.0, 0.0)\n\nFirst differing element 0:\n-0.025\n0.0\n\n- (-0.025, 0.0, 0.0)\n+ (0.0, 0.0, 0.0)\n"
+    },
+    {
+      "test": "test_architecture_acceptance.NumericalAndStateRequirements.test_rejected_delta_does_not_partially_mutate_world",
+      "outcome": "FAIL",
+      "detail": "Traceback (most recent call last):\n  File \"/mnt/data/_inputs/audit/cellular_architecture_verification/tests/test_architecture_acceptance.py\", line 90, in test_rejected_delta_does_not_partially_mutate_world\n    self.assertEqual(w, initial)\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^\nAssertionError: World[59 chars]ion=(99, 0, 0), parent_id=None, velocity=(0.0,[513 chars]a={}) != World[59 chars]ion=(0.0, 0.0, 0.0), parent_id=None, velocity=[518 chars]a={})\n"
+    },
+    {
+      "test": "test_architecture_acceptance.NumericalAndStateRequirements.test_second_division_of_retained_parent_has_unique_id",
+      "outcome": "FAIL",
+      "detail": "Traceback (most recent call last):\n  File \"/mnt/data/_inputs/audit/cellular_architecture_verification/tests/test_architecture_acceptance.py\", line 78, in test_second_division_of_retained_parent_has_unique_id\n    p.evaluate(w.clone(), 1.0).commit(w)\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\n  File \"/mnt/data/_legacy_reproduction/20260917T181102Z_ozrlq2rp/extracted/multifidelity_cell_sim_architecture/src/cellsim/core/state.py\", line 90, in commit\n    raise ValueError(f\"duplicate cell id: {cell.id}\")\nValueError: duplicate cell id: a.g1\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/mnt/data/_inputs/audit/cellular_architecture_verification/tests/test_architecture_acceptance.py\", line 80, in test_second_division_of_retained_parent_has_unique_id\n    self.fail(f'repeated division must not collide with an existing id: {e}')\n    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: repeated division must not collide with an existing id: duplicate cell id: a.g1\n"
+    },
+    {
+      "test": "test_architecture_acceptance.NumericalAndStateRequirements.test_zero_elapsed_time_does_not_evolve_continuous_state",
+      "outcome": "FAIL",
+      "detail": "Traceback (most recent call last):\n  File \"/mnt/data/_inputs/audit/cellular_architecture_verification/tests/test_architecture_acceptance.py\", line 47, in test_zero_elapsed_time_does_not_evolve_continuous_state\n    self.assertEqual(w.scalar_fields['x'].values['v'], 1.0)\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 0.95 != 1.0\n"
+    },
+    {
+      "test": "test_architecture_acceptance.PositiveControls.test_manual_equal_unit_amount_exchange_preserves_total",
+      "outcome": "PASS"
+    },
+    {
+      "test": "test_architecture_acceptance.PositiveControls.test_no_overlap_produces_no_motion",
+      "outcome": "PASS"
+    },
+    {
+      "test": "test_architecture_acceptance.PositiveControls.test_scheduler_rejects_backwards_time",
+      "outcome": "PASS"
+    },
+    {
+      "test": "test_architecture_acceptance.PositiveControls.test_world_clone_is_independent",
+      "outcome": "PASS"
+    },
+    {
+      "test": "test_architecture_acceptance.ProposedInputAndEvidenceSafeguards.test_declared_write_contract_is_enforced",
+      "outcome": "FAIL",
+      "detail": "Traceback (most recent call last):\n  File \"/mnt/data/_inputs/audit/cellular_architecture_verification/tests/test_architecture_acceptance.py\", line 120, in test_declared_write_contract_is_enforced\n    with self.assertRaises((ValueError, PermissionError)):\n         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: (<class 'ValueError'>, <class 'PermissionError'>) not raised\n"
+    },
+    {
+      "test": "test_architecture_acceptance.ProposedInputAndEvidenceSafeguards.test_missing_metrics_do_not_assert_scientific_qualification",
+      "outcome": "FAIL",
+      "detail": "Traceback (most recent call last):\n  File \"/mnt/data/_inputs/audit/cellular_architecture_verification/tests/test_architecture_acceptance.py\", line 112, in test_missing_metrics_do_not_assert_scientific_qualification\n    self.assertNotIn('inside qualified regime', diagnostics['reason'])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'inside qualified regime' unexpectedly found in 'coarse native model is inside qualified regime'\n"
+    },
+    {
+      "test": "test_architecture_acceptance.ProposedInputAndEvidenceSafeguards.test_nonfinite_fidelity_metric_rejected",
+      "outcome": "FAIL",
+      "detail": "Traceback (most recent call last):\n  File \"/mnt/data/_inputs/audit/cellular_architecture_verification/tests/test_architecture_acceptance.py\", line 107, in test_nonfinite_fidelity_metric_rejected\n    with self.assertRaises((ValueError, TypeError)):\n         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: (<class 'ValueError'>, <class 'TypeError'>) not raised\n"
+    },
+    {
+      "test": "test_architecture_acceptance.ProposedInputAndEvidenceSafeguards.test_zero_process_timestep_rejected_before_execution",
+      "outcome": "FAIL",
+      "detail": "Traceback (most recent call last):\n  File \"/mnt/data/_inputs/audit/cellular_architecture_verification/tests/test_architecture_acceptance.py\", line 103, in test_zero_process_timestep_rejected_before_execution\n    with self.assertRaises((ValueError, TypeError)):\n         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: (<class 'ValueError'>, <class 'TypeError'>) not raised\n"
+    }
+  ]
+}

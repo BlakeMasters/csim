@@ -1,0 +1,26 @@
+[
+  {
+    "file": "cellular_architecture_verification.zip",
+    "bytes": 93310,
+    "sha256": "60493b97241282a270249f79a51d5e18ba424f37cb530ababe231fc4ec79e086",
+    "role": "supplied historical input, preserved byte-for-byte"
+  },
+  {
+    "file": "cellular_architecture_verification_report.md",
+    "bytes": 48334,
+    "sha256": "c6269a9e4c0db9048c6def570eca185947099a1e7d0a31d03190cef5e644f0ca",
+    "role": "supplied historical input, preserved byte-for-byte"
+  },
+  {
+    "file": "multifidelity_cell_sim_architecture.zip",
+    "bytes": 59562,
+    "sha256": "e0e7df515b25389598123943400377729accbbb7874c865feb5f677e98a7b5c1",
+    "role": "supplied historical input, preserved byte-for-byte"
+  },
+  {
+    "file": "multifidelity_cell_sim_architecture.zip.sha256",
+    "bytes": 106,
+    "sha256": "1ff172f79c1e22383cb6e7afc5dc362fe2b5b191ee3fd68c0bf31a7b56147488",
+    "role": "supplied historical input, preserved byte-for-byte"
+  }
+]

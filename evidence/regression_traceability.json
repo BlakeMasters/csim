@@ -1,0 +1,74 @@
+[
+  {
+    "id": "A01",
+    "audit_issue": "Zero elapsed time evolved continuous state",
+    "new_test": "test_reference_core.TimingTests.test_zero_duration_is_noop",
+    "scope": "Fixed by interval semantics; no process call for zero duration."
+  },
+  {
+    "id": "A02",
+    "audit_issue": "Endpoint received an extra full Euler step",
+    "new_test": "test_reference_core.TimingTests.test_exact_endpoint_two_updates",
+    "scope": "Exactly two half-interval steps over one unit; partial final intervals also tested."
+  },
+  {
+    "id": "A03",
+    "audit_issue": "Equal pair midpoint drifted under pair-only mechanics",
+    "new_test": "test_reference_core.MechanicsDivisionTests.test_equal_pair_preserves_midpoint",
+    "scope": "Equal/opposite forces from frozen positions; equal-drag condition explicit."
+  },
+  {
+    "id": "A04",
+    "audit_issue": "Pair results depended on entity iteration order",
+    "new_test": "test_reference_core.MechanicsDivisionTests.test_entity_order_independent",
+    "scope": "Sorted IDs and symmetric accumulation; not a cross-device determinism guarantee."
+  },
+  {
+    "id": "A05",
+    "audit_issue": "Instantaneous division doubled volume",
+    "new_test": "test_reference_core.MechanicsDivisionTests.test_division_volume_amount_balance",
+    "scope": "Explicit partition of volume and amounts; not a cytokinesis model."
+  },
+  {
+    "id": "A06",
+    "audit_issue": "Repeated retained-parent division collided on daughter ID",
+    "new_test": "test_reference_core.MechanicsDivisionTests.test_repeated_division_unique_ids",
+    "scope": "Sequence-based IDs and event history; no silent collision renaming."
+  },
+  {
+    "id": "A07",
+    "audit_issue": "Rejected delta partially mutated state",
+    "new_test": "test_reference_core.StateTests.test_duplicate_birth_is_atomic",
+    "scope": "Preflight a candidate copy before publishing; entire failed window also tested."
+  },
+  {
+    "id": "A08",
+    "audit_issue": "Absolute error could be negative",
+    "new_test": "test_reference_core.ChemistryTests.test_absolute_error_nonnegative",
+    "scope": "Separate signed residual and nonnegative absolute error."
+  },
+  {
+    "id": "A09",
+    "audit_issue": "Zero process timestep was accepted",
+    "new_test": "test_reference_core.TimingTests.test_zero_process_step_rejected",
+    "scope": "Nonpositive step/window rejected before iteration."
+  },
+  {
+    "id": "A10",
+    "audit_issue": "NaN fidelity metric silently selected a level",
+    "new_test": "test_reference_core.EvidenceTests.test_nonfinite_metric_rejected",
+    "scope": "Finite-value checks; threshold controller removed rather than patched."
+  },
+  {
+    "id": "A11",
+    "audit_issue": "No metrics could imply scientific qualification",
+    "new_test": "test_reference_core.EvidenceTests.test_missing_evidence_unqualified",
+    "scope": "Missing evidence returns unqualified; exact-case match still has no biological qualification."
+  },
+  {
+    "id": "A12",
+    "audit_issue": "Declared write contract was not enforced",
+    "new_test": "test_reference_core.TimingTests.test_undeclared_write_rejected_without_mutation",
+    "scope": "Broad categories enforced; fine-grained ports and read authorization still planned."
+  }
+]

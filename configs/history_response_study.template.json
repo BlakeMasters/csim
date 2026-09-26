@@ -1,0 +1,92 @@
+{
+  "schema_version": "proposal-1",
+  "status": "planned",
+  "runnable": false,
+  "contract_status": "design_only_no_runtime_parser",
+  "scientific_status": "unqualified",
+  "study_id": null,
+  "question": "Does recorded exposure history improve prediction of one measured cell-context response beyond current conditions and simple exposure summaries?",
+  "candidate_source_ids": [
+    "E03",
+    "E03R"
+  ],
+  "accepted_dataset_id": null,
+  "raw_artifacts": [],
+  "reuse_terms": null,
+  "context": {
+    "cell_identity": null,
+    "authentication_evidence": null,
+    "culture_protocol": null,
+    "experimental_unit": null,
+    "specimen_key_mapping": null,
+    "batch_mapping": null
+  },
+  "observation": {
+    "name": null,
+    "unit": null,
+    "entity_granularity": null,
+    "pairing": null,
+    "operator_ref": null,
+    "uncertainty_ref": null,
+    "exclusion_policy_ref": null
+  },
+  "exposure": {
+    "source_units": null,
+    "target_representation": null,
+    "conversion_ref": null,
+    "condition_schedule_map_ref": null,
+    "biological_time_origin": null,
+    "availability_time_ref": null,
+    "history_completeness": null,
+    "interval_convention": "left_closed_right_open"
+  },
+  "split": {
+    "grouping_ref": null,
+    "related_group_closure_ref": null,
+    "development_units": [],
+    "validation_units": [],
+    "final_units": [],
+    "reserved_schedules": [],
+    "outcomes_already_inspected_ref": null,
+    "frozen_before_fitting": false
+  },
+  "models": {
+    "controls": [
+      "current_conditions_and_culture_age",
+      "prespecified_exposure_summary",
+      "small_mechanistic_response"
+    ],
+    "candidate": "scalar_relaxation_memory",
+    "response_definition_ref": null,
+    "parameters": null,
+    "initial_state_provenance": null,
+    "observation_parameters": null
+  },
+  "evaluation": {
+    "primary_metric": null,
+    "acceptance_margin": null,
+    "margin_justification": null,
+    "independent_unit_resampling_ref": null,
+    "identifiability_plan_ref": null,
+    "negative_controls": [
+      "history_shuffle_within_valid_blocks",
+      "memory_state_ablation"
+    ],
+    "rollout_claim": false
+  },
+  "execution": {
+    "command": null,
+    "model_bundle_sha256": null,
+    "training_performed": false,
+    "biological_validation_performed": false
+  },
+  "unresolved": [
+    "Accept dataset terms and biological context",
+    "Authenticate specimen/batch/condition mapping",
+    "Select measured observable and observation operator",
+    "Establish whether independent schedule evaluation is feasible",
+    "Freeze exclusions, metrics, model selection and cohort plan",
+    "Define model equations, parameters and initialization using development evidence"
+  ],
+  "fallback": "If no candidate supports independent history evaluation, retain a population-endpoint/descriptive scope and report that limit."
+}

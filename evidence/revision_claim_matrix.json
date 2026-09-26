@@ -1,0 +1,324 @@
+[
+  {
+    "id": "C01",
+    "claim": "Solver-independent canonical state has precedent",
+    "verdict": "supported_with_limits",
+    "evidence": [
+      "S01",
+      "S02",
+      "S03"
+    ],
+    "corrected_statement": "Shared semantics and process interfaces have precedent; complete lossless restart across all solver representations is unproven.",
+    "v2_action": "Shared/private state replaces universal-state sufficiency.",
+    "v2_document": "docs/ARCHITECTURE.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C02",
+    "claim": "Discrete cells plus continuum fields is established",
+    "verdict": "supported",
+    "evidence": [
+      "S04",
+      "S26"
+    ],
+    "corrected_statement": "A well-established hybrid modeling choice for specified scales and assumptions.",
+    "v2_action": "Hybrid cell/field model retained as planned biological structure, not implemented 3D environment.",
+    "v2_document": "docs/ARCHITECTURE.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C03",
+    "claim": "Multirate scheduling is appropriate",
+    "verdict": "supported_with_limits",
+    "evidence": [
+      "S01",
+      "S04"
+    ],
+    "corrected_statement": "Separate timescales are supported; specific timesteps and global integration accuracy require verification.",
+    "v2_action": "Explicit window/subcycling reference; no general multirate accuracy claim.",
+    "v2_document": "docs/NUMERICAL_CONTRACTS.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C04",
+    "claim": "preCICE makes selected packages readily integrable",
+    "verdict": "overstated",
+    "evidence": [
+      "S05",
+      "S06",
+      "S07"
+    ],
+    "corrected_statement": "A suitable coupling library; named adapters must be implemented/qualified, including checkpoint and mapping semantics.",
+    "v2_action": "Offline adapters first; live preCICE integration remains a build task.",
+    "v2_document": "docs/BACKEND_INTEGRATION.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C05",
+    "claim": "SOFA and ESPResSo are high-fidelity biological oracles",
+    "verdict": "unsupported_as_general_claim",
+    "evidence": [
+      "S22",
+      "S23"
+    ],
+    "corrected_statement": "They are specialist numerical comparators with context-specific models, not biological ground truth.",
+    "v2_action": "Oracle terminology removed; each comparator requires matched model and convergence.",
+    "v2_document": "docs/BACKEND_INTEGRATION.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C06",
+    "claim": "Tissue Forge offers an independent reference",
+    "verdict": "conditional",
+    "evidence": [
+      "S24"
+    ],
+    "corrected_statement": "Useful only after aligning equations, constitutive assumptions, units, boundaries, observables and numerical convergence.",
+    "v2_action": "Tissue Forge remains a candidate comparator, not an executed independent reference.",
+    "v2_document": "docs/BACKEND_INTEGRATION.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C07",
+    "claim": "932/1055 BioModels matched across at least two engines",
+    "verdict": "verified_scope_restricted",
+    "evidence": [
+      "S08"
+    ],
+    "corrected_statement": "The 2025 study reports this for ODE models, including template experiments; it does not validate coupled spatial tumor biology.",
+    "v2_action": "ODE cross-engine result preserved at its original scope; not extrapolated to spatial physics.",
+    "v2_document": "docs/SOURCES.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C08",
+    "claim": "FDA/ASME credibility methods directly justify the proposed ML/fidelity layer",
+    "verdict": "scope_overextended",
+    "evidence": [
+      "S09",
+      "S10"
+    ],
+    "corrected_statement": "The earlier no-approval caveat was correct. However, FDA guidance explicitly excludes standalone ML and does not cover the learned part of a hybrid; the systems-biology article is a proposal, not approval.",
+    "v2_action": "No regulatory approval or ML qualification inferred.",
+    "v2_document": "docs/OPERATIONS.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C09",
+    "claim": "Surrogate distillation is feasible",
+    "verdict": "supported_with_limits",
+    "evidence": [
+      "S11"
+    ],
+    "corrected_statement": "Empirical biomechanical precedent exists; no inherited teacher credibility, online coverage guarantee or achieved speedup here.",
+    "v2_action": "Surrogate feasibility is a later experiment; no model trained.",
+    "v2_document": "docs/FIDELITY_RESEARCH.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C10",
+    "claim": "Mean discrepancy plus lambda uncertainty gives a guarantee",
+    "verdict": "unproven",
+    "evidence": [],
+    "corrected_statement": "Only a proposed score until calibrated against a declared coverage/error target and distribution.",
+    "v2_action": "Error-plus-uncertainty guarantee withdrawn; empirical/coverage requirements specified.",
+    "v2_document": "docs/FIDELITY_RESEARCH.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C11",
+    "claim": "Regional multi-fidelity cellular simulation is novel",
+    "verdict": "not_established",
+    "evidence": [
+      "S12",
+      "S13",
+      "S01"
+    ],
+    "corrected_statement": "Prior hybrid and compositional work exists; the exact controller is a proposed contribution, not an established novelty claim.",
+    "v2_action": "No novelty claim; dedicated prior-art and implementation evaluation required.",
+    "v2_document": "docs/FIDELITY_RESEARCH.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C12",
+    "claim": "Four-population vascularized spheroids demonstrate functional spheroid perfusion",
+    "verdict": "incorrect_extension",
+    "evidence": [
+      "S14"
+    ],
+    "corrected_statement": "The in-vitro pseudovascular spheroid arm is a morphology/TME benchmark, not demonstrated spheroid perfusion. The paper separately reports in-vivo perfused-vessel comparisons.",
+    "v2_action": "Spheroid morphology and in-vivo perfusion remain distinct measurements.",
+    "v2_document": "docs/BIOLOGICAL_VALIDATION.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C13",
+    "claim": "Vascularized-organoid paper validates tumor therapy",
+    "verdict": "incorrect_extension",
+    "evidence": [
+      "S15"
+    ],
+    "corrected_statement": "The tested spheroids/organoids are non-tumor vascular models; relevance is methodological.",
+    "v2_action": "Non-cancer organoid platform is vascular-engineering precedent only.",
+    "v2_document": "docs/BIOLOGICAL_VALIDATION.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C14",
+    "claim": "Renal tumor chip supplies useful component data",
+    "verdict": "supported_with_limits",
+    "evidence": [
+      "S16"
+    ],
+    "corrected_statement": "Scoped bead/tracer/sprouting observables exist, with limited replication and surrogate tracers.",
+    "v2_action": "Renal chip target restricted to measured tracer/bead/vascular endpoints.",
+    "v2_document": "docs/BIOLOGICAL_VALIDATION.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C15",
+    "claim": "The ABC paper provides broad evidence for tumor-model calibration",
+    "verdict": "supported_but_narrower",
+    "evidence": [
+      "S17",
+      "S18"
+    ],
+    "corrected_statement": "The calibration result is genuine but conditional on a 2D, no-death mouse xenograft model; excluded data and the breast-labeled cell line limit broader biological interpretation.",
+    "v2_action": "ABC example kept conditional on its model/data and identity caveats.",
+    "v2_document": "docs/BIOLOGICAL_VALIDATION.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C16",
+    "claim": "SBML/SED-ML/OMEX fully specify the proposed world",
+    "verdict": "overstated",
+    "evidence": [
+      "S19",
+      "S20",
+      "S21",
+      "S28"
+    ],
+    "corrected_statement": "Use their supported subsets, plus explicitly versioned spatial/coupling/restart extensions and round-trip tests.",
+    "v2_action": "Custom ZIP is not OMEX; standard support requires actual feature/round-trip tests.",
+    "v2_document": "docs/ARCHITECTURE.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C17",
+    "claim": "Warp is the best or biologically credible production backend",
+    "verdict": "unverified",
+    "evidence": [
+      "S25"
+    ],
+    "corrected_statement": "A technically relevant candidate; speed, portability, accuracy and workload costs remain to be measured.",
+    "v2_action": "Warp optional; no selection as fastest or biologically preferred.",
+    "v2_document": "docs/BACKEND_INTEGRATION.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C18",
+    "claim": "The packaged example realizes the proposed vascularized microtumor experiment",
+    "verdict": "proposal_not_implementation",
+    "evidence": [
+      "LOCAL_SOURCE"
+    ],
+    "corrected_statement": "The package explicitly labels its numerical routines as toys. The runnable example has two cell centers and uniform scalar decay; YAML is not consumed and specialist adapters are placeholders.",
+    "v2_action": "Example renamed synthetic bookkeeping; microtumor is nonrunnable proposal.",
+    "v2_document": "docs/MIGRATION.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C19",
+    "claim": "The four passing tests establish scaffold correctness beyond smoke testing",
+    "verdict": "original_count_verified_but_insufficient",
+    "evidence": [
+      "LOCAL_TESTS"
+    ],
+    "corrected_statement": "All four original tests pass. Targeted additional checks fail on 8 numerical/state requirements and 4 proposed safeguards; these are not a representative defect-rate estimate.",
+    "v2_action": "Selected regression and numerical evidence reported with explicit limits.",
+    "v2_document": "docs/KNOWN_LIMITATIONS.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C20",
+    "claim": "Total error is a simple sum of independent uncertainties",
+    "verdict": "not_justified",
+    "evidence": [],
+    "corrected_statement": "Define signed discrepancies or valid bounds; variance sums require covariance/independence assumptions and switching error must be included.",
+    "v2_action": "Error categories distinguished; no unjustified independence assumption.",
+    "v2_document": "docs/NUMERICAL_CONTRACTS.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C21",
+    "claim": "Local solver escalation ensures global trajectory accuracy",
+    "verdict": "unproven",
+    "evidence": [],
+    "corrected_statement": "Requires stable coupled dynamics, controlled transfer and accumulated error; local residual alone is insufficient.",
+    "v2_action": "Conditional accumulation bound and switching errors stated; no runtime guarantee.",
+    "v2_document": "docs/NUMERICAL_CONTRACTS.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C22",
+    "claim": "Increasing detail monotonically improves biological realism",
+    "verdict": "unsupported",
+    "evidence": [],
+    "corrected_statement": "More detail can add model-form/parameter error; rank solver-model pairs empirically per quantity of interest.",
+    "v2_action": "Observable-specific model portfolio replaces monotonic realism ladder.",
+    "v2_document": "docs/FIDELITY_RESEARCH.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C23",
+    "claim": "Arbitrary external entities can be physically predicted",
+    "verdict": "conditional",
+    "evidence": [],
+    "corrected_statement": "Interfaces can accept entities; interactions and biological response laws must still be supplied and calibrated.",
+    "v2_action": "Externals require typed inputs and justified response laws.",
+    "v2_document": "docs/EXTERNALS.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C24",
+    "claim": "A validated constitutive law transfers across cell populations",
+    "verdict": "unproven",
+    "evidence": [
+      "S17",
+      "S18",
+      "S27",
+      "S29",
+      "S30"
+    ],
+    "corrected_statement": "Material, geometry and phenotype parameters must be qualified by cell type, state, assay and perturbation range.",
+    "v2_action": "Cell identity, calibration and applicability required before population transfer.",
+    "v2_document": "docs/BIOLOGICAL_VALIDATION.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C25",
+    "claim": "Detailed mechanics and nuclear deformation have experimental relevance",
+    "verdict": "supported_in_specific_contexts",
+    "evidence": [
+      "S29",
+      "S30"
+    ],
+    "corrected_statement": "Confinement experiments support specific mechanical/phenotypic observables; not every cell needs every process or the same material law.",
+    "v2_action": "Mechanics evidence motivates scoped later experiments, not blanket detailed modeling.",
+    "v2_document": "docs/BIOLOGICAL_VALIDATION.md",
+    "new_biological_evidence": false
+  },
+  {
+    "id": "C26",
+    "claim": "Mechanical strain can be converted to universal rupture or mutation thresholds",
+    "verdict": "not_established",
+    "evidence": [
+      "S29",
+      "S30"
+    ],
+    "corrected_statement": "The cited studies do not supply general quantitative thresholds applicable across cell lines, matrix systems and biological states.",
+    "v2_action": "Universal strain/rupture thresholds removed; biological threshold fields remain unset.",
+    "v2_document": "docs/BIOLOGICAL_VALIDATION.md",
+    "new_biological_evidence": false
+  }
+]

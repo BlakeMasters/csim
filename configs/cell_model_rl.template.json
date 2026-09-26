@@ -1,0 +1,139 @@
+{
+  "schema_version": "proposal-1",
+  "status": "planned",
+  "runnable": false,
+  "contract_status": "design_only_no_runtime_parser",
+  "scientific_status": "unqualified",
+  "episode_family_id": "synthetic_cell_memory_transfer",
+  "intent": "Train the numeric virtual cell response model itself; an experiment controller is optional.",
+  "task_domain": "synthetic_engineering",
+  "learner": {
+    "kind": "numeric_cell_response_policy",
+    "architecture": null,
+    "action_distribution": null,
+    "weights_ref": null,
+    "weights_fixed_within_episode": true,
+    "per_cell_state_schema_ref": null,
+    "initialization_ref": null
+  },
+  "environment": {
+    "kernel_namespace": "cellsim_v2",
+    "topology": "fixed",
+    "initial_world_ref": null,
+    "species_id": null,
+    "reference_law_ref": null,
+    "reference_parameters": null,
+    "exposure_trace_ref": null,
+    "step_s": null,
+    "horizon_s": null,
+    "stage_clock_contract_ref": null,
+    "seed": null
+  },
+  "observations": {
+    "allowed_categories": [
+      "declared_current_local_environment",
+      "declared_cell_context",
+      "available_measurements_and_masks",
+      "accepted_response_history",
+      "current_time_and_interval"
+    ],
+    "forbidden_categories": [
+      "hidden_reference_parameters",
+      "future_measured_outcomes",
+      "future_unannounced_interventions",
+      "final_benchmark_answers"
+    ],
+    "feature_order": null,
+    "units": null
+  },
+  "actions": {
+    "kind": "typed_cell_response_proposal",
+    "allowed_effect": "same_species_cell_field_transfer",
+    "quantity_type": null,
+    "units": null,
+    "bounds_ref": null,
+    "response_state_replacement_ref": null,
+    "unrestricted_amount_replacement": false,
+    "conservative_commit_required": true,
+    "invalid_proposal_behavior": "reject_atomically_and_record"
+  },
+  "evaluator": {
+    "observation_operator_ref": null,
+    "label_source": "declared_synthetic_reference",
+    "reward_definition_ref": null,
+    "reward_weights": null,
+    "normalization_ref": null,
+    "distributional_score_ref": null,
+    "physical_invariants": "hard_transition_constraints",
+    "biological_validation": false
+  },
+  "data_boundaries": {
+    "reward_targets_role": "training_information",
+    "final_benchmark_in_training_pool": false,
+    "final_cohort_ref": null,
+    "candidate_frozen_before_final_evaluation": true
+  },
+  "controls": [
+    "known_synthetic_law",
+    "fitted_small_memory_model",
+    "supervised_endpoint_model",
+    "multistep_sequence_model",
+    "same_capacity_rl_candidate"
+  ],
+  "challenge_requirements": [
+    "matched_current_inputs_with_different_histories",
+    "reserved_exposure_schedules",
+    "long_horizon_scoring",
+    "invalid_proposals",
+    "checkpoint_and_rng_replay",
+    "missing_prehistory",
+    "no_oracle_input_leakage"
+  ],
+  "accounting": {
+    "record_categories": [
+      "generation",
+      "label_or_reference_computation",
+      "fitting",
+      "tuning",
+      "policy_sampling",
+      "evaluation",
+      "failed_work",
+      "persistence"
+    ],
+    "budget": null,
+    "failures_preserved": true,
+    "infrastructure_failure_separate_from_model_failure": true
+  },
+  "ensemble_plan": {
+    "population": "shared_weights_or_context_adapters_with_private_cell_states",
+    "uncertainty": "alternative_complete_model_worlds",
+    "interaction_laws_ref": null,
+    "biological_context": null
+  },
+  "backend": {
+    "numeric_trainer": null,
+    "tested_revision": null,
+    "mimo_role": "environment_design_reference_and_optional_controller_adapter",
+    "external_engine_required_for_contract": false
+  },
+  "execution": {
+    "command": null,
+    "training_performed": false,
+    "adapter_implemented": false
+  },
+  "unresolved": [
+    "Define a causal synthetic reference with persistent memory",
+    "Implement transaction-owned response state and stage clocks",
+    "Implement numeric episode and complete replay",
+    "Choose observation score and action distribution",
+    "Freeze independent task families and controls",
+    "Measure local runtime and choose a tested numeric trainer only if warranted"
+  ],
+  "source_ids": [
+    "E09",
+    "E10",
+    "E11",
+    "E12",
+    "E13"
+  ]
+}

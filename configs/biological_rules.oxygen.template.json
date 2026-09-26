@@ -1,0 +1,38 @@
+{
+  "schema_version": "1",
+  "id": "oxygen-response-planning",
+  "runnable": false,
+  "execution_mode": "hypothesis",
+  "context": {
+    "cell_identity": null,
+    "tissue": null,
+    "scope": "Planning contract for one sourced oxygen-response experiment. Low oxygen thresholds, uptake law applicability and observation mapping require evidence."
+  },
+  "source_refs": [],
+  "rules": [
+    {
+      "id": "low_oxygen_annotation",
+      "kind": "concentration_switch",
+      "cell_ids": [],
+      "species": "oxygen",
+      "parameters": {
+        "on_below": {"value": null, "unit": "mol/m^3", "provenance": "unknown", "source_ref": null, "uncertainty": null},
+        "off_above": {"value": null, "unit": "mol/m^3", "provenance": "unknown", "source_ref": null, "uncertainty": null}
+      },
+      "initial_state": "off",
+      "description": "Candidate discrete low-oxygen annotation; no HIF pathway, viability, death or differentiation law is implied."
+    },
+    {
+      "id": "oxygen_transfer",
+      "kind": "saturable_transfer",
+      "cell_ids": [],
+      "species": "oxygen",
+      "parameters": {
+        "vmax": {"value": null, "unit": "mol/s", "provenance": "unknown", "source_ref": null, "uncertainty": null},
+        "km": {"value": null, "unit": "mol/m^3", "provenance": "unknown", "source_ref": null, "uncertainty": null}
+      },
+      "gate": null,
+      "description": "Candidate same-species membrane transfer only. Metabolic oxygen consumption requires a separate reaction/ledger model and measurements."
+    }
+  ]
+}

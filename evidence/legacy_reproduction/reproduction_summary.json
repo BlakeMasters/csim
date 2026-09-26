@@ -1,0 +1,9 @@
+{
+  "input_sha256": "e0e7df515b25389598123943400377729accbbb7874c865feb5f677e98a7b5c1",
+  "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+  "original_tests_returncode": 0,
+  "original_example_returncode": 0,
+  "acceptance_returncode": 1,
+  "known_named_outcomes_match": true,
+  "output_directory": "/mnt/data/_legacy_reproduction/20260917T181102Z_ozrlq2rp"
+}

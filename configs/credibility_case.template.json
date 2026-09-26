@@ -1,0 +1,21 @@
+{
+  "schema_version": "2",
+  "status": "unqualified",
+  "runnable": false,
+  "question_ref": null,
+  "context_of_use_ref": null,
+  "model_fingerprint": null,
+  "qoi_ref": null,
+  "numerical_verification_refs": [],
+  "independent_comparator_refs": [],
+  "calibration_refs": [],
+  "experimental_validation_refs": [],
+  "uncertainty_model_ref": null,
+  "applicability_domain_ref": null,
+  "known_limitations": [
+    "No experimental comparison or specialist integration has been performed."
+  ],
+  "reviewer": null,
+  "review_date": null,
+  "biological_validation": false
+}

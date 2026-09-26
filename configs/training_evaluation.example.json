@@ -1,0 +1,13 @@
+{
+  "metric": "mean_absolute_error",
+  "observable_id": "intracellular_amount_next",
+  "unit": "mol",
+  "baseline_ids": ["no_change", "training_mean_amount_increment"],
+  "metadata": {
+    "metric_definition": "Mean absolute prediction error in mol over the predeclared final cohort; report per-condition results as well.",
+    "metric_unit": "mol",
+    "acceptance_tolerance": null,
+    "status": "declaration_only_no_metric_or_baseline_executed",
+    "biological_validation": false
+  }
+}
