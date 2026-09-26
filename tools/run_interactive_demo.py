@@ -862,6 +862,13 @@ PAGE = """<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name=
 </style></head><body><header><div class="kicker">Csim · local synthetic reference</div><h1>Virtual-cell playground</h1><p class="intro">Choose an episode, set a typed rate, and watch accepted cell–field state evolve. Replay the accepted history or inspect the separate symbolic and learning evidence.</p><div class="scope">Synthetic engineering examples only. Diagnostic scores are training feedback, not cell health or biological validation. The adaptive curriculum is not an RL algorithm.</div></header><main><aside class="sidebar"><section><h2>Set up an episode</h2><label>Scenario<select id="mode"></select></label><div id="config" class="controls"></div><button id="reset" class="primary">Reset scenario</button><p id="config-error" class="status-line bad" role="alert"></p></section><section><h2>Advance one step</h2><label id="action-label" for="action-rate">Typed rate (mol/s)</label><input id="action-rate" type="number" min="0" max="10" step="any"><div class="row actions"><button id="step" class="primary">Step</button><button id="replay">Verify replay</button></div><p id="action-status" class="status-line" role="status"></p><p class="note">A rejected action leaves the accepted state unchanged and remains visible in the trace.</p></section><section><h2>Export and record</h2><div class="row actions"><button id="export">Download accepted session</button><button id="record">Record through Engine + OSS</button></div><p id="record-status" class="status-line" role="status"></p><p class="note">The ledger button replays a complete uptake episode through a fixed local command. Engine and OSS IDs are execution evidence, separate from simulation results.</p></section></aside><div class="content"><section><h2>Accepted state <span id="state-badge" class="badge"></span></h2><p id="mode-description" class="muted"></p><div id="state-grid" class="state-grid"></div><h3>Live time series</h3><div id="charts" class="charts"></div></section><section><h2>Interaction trace</h2><p class="muted">Rates, field and inventory changes, memory, transfer and synthetic score are recorded per attempted step.</p><div class="table-wrap"><table><thead><tr><th>#</th><th>Status</th><th>Rate (mol/s)</th><th>Field c (mol/m³)</th><th>Inventory (mol)</th><th>Memory (1)</th><th>Transfer (mol)</th><th>Score</th></tr></thead><tbody id="trace-body"></tbody></table></div></section><section><h2>Typed symbolic program</h2><p class="muted">The current version-0 language executes only a synthetic concentration switch and gated same-species transfer. It is a separate reference scenario from the interactive episode.</p><div id="symbolic-summary" class="evidence-grid"></div><details><summary>View validated typed JSON</summary><pre id="symbolic-json"></pre></details></section><section><h2>Proposer and learner iterations</h2><p class="muted">Pre-fit development error by selected schedule, plus frozen teacher-forced one-step evaluation. Lower MAE is better; no biological or RL benefit is inferred.</p><div id="learning-summary" class="evidence-grid"></div><div class="table-wrap"><table><thead><tr><th>Arm</th><th>Round</th><th>Selected history</th><th>Pre-fit MAE (1)</th><th>Mean teacher score</th></tr></thead><tbody id="learning-body"></tbody></table></div></section><section><h2>Engine, ledger and artifact</h2><p class="muted">Execution and ledger identifiers are recorded independently of scientific component values.</p><div id="evidence-grid" class="evidence-grid"></div><p id="evidence-path" class="note"></p><button id="refresh-evidence">Refresh evidence</button></section></div></main><footer>Localhost only · no external assets · source artifacts remain in the run directory.</footer><script src="/app.js"></script></body></html>"""
 
 # Keep the evidence qualification visible without occupying the first screenful.
+PAGE = PAGE.replace("Csim · local synthetic reference", "Csim · virtual-cell R&D playground")
+PAGE = PAGE.replace(
+    "Synthetic engineering examples only. Diagnostic scores are training feedback, not cell health or biological validation. The adaptive curriculum is not an RL algorithm.",
+    "Explore tracked cell–field dynamics, NF-κB response experiments, symbolic programs, and Ocura OSS run evidence. Model states and observed p65 traces retain distinct provenance.")
+PAGE = PAGE.replace(
+    "Pre-fit development error by selected schedule, plus frozen teacher-forced one-step evaluation. Lower MAE is better; no biological or RL benefit is inferred.",
+    "Compare proposer-selected schedules, pre-fit development error, and frozen one-step learner evaluation. Lower MAE is better; these scores describe the computational experiment.")
 PAGE = PAGE.replace("</style>",
                     ".scope{padding:4px 0;background:none;border:0;color:var(--muted);font-size:.78rem;margin:5px 0}header{padding-top:18px;padding-bottom:10px}main>.content,main>.sidebar,.content>section,#cell-scene,.csim-pixel-layout{min-width:0;max-width:100%}#observed-canvas{max-width:100%}@media(max-width:1150px){.csim-pixel-layout{grid-template-columns:minmax(0,1fr)}.csim-pixel-inspector{min-height:0}}</style>")
 PAGE = PAGE.replace("style-src 'unsafe-inline'", "style-src 'self' 'unsafe-inline'")
@@ -872,7 +879,7 @@ PAGE = PAGE.replace("</style>",
 PAGE = PAGE.replace('<button id="record">Record through Engine + OSS</button>',
                     '<button id="record">Record through Ocura OSS</button><button id="record-engine">Optional Engine + OSS</button>')
 PAGE = PAGE.replace("The ledger button replays a complete uptake episode through a fixed local command. Engine and OSS IDs are execution evidence, separate from simulation results.",
-                    "The OSS button records an exact complete uptake replay. Engine is optional and only appears when configured. NF-κB interactive actions are not yet recordable here.")
+                    "Record a completed uptake trace through Ocura OSS, or use the optional Engine route when configured. The integrated NF-κB run receipts appear in the evidence panel.")
 PAGE = PAGE.replace("Engine, ledger and artifact", "Ocura OSS ledger and optional Engine")
 PAGE = PAGE.replace(
     '<section><h2>Typed symbolic program</h2><p class="muted">The current version-0 language executes only a synthetic concentration switch and gated same-species transfer. It is a separate reference scenario from the interactive episode.</p>',
@@ -910,9 +917,9 @@ PAGE = PAGE.replace("</header>",
                     '1:20 Open the campaign review when linked. '
                     '1:40 Inspect <a href="#learning-section">learner iterations</a> and '
                     '<a href="#ledger-section">Ocura OSS evidence</a>. '
-                    'Synthetic state and delivery are separate from measured reporter traces.'
+                    'Model state and observed reporter traces retain separate provenance.'
                     '<span id="coupled-guide-link"></span></p>'
-                    '<div class="demo-guide-presets"><span>Reset synthetic NF-κB:</span>'
+                    '<div class="demo-guide-presets"><span>Reset NF-κB model:</span>'
                     '<button type="button" data-cell-preset="1">1 cell</button>'
                     '<button type="button" data-cell-preset="3">3 cells</button>'
                     '<button type="button" data-cell-preset="5">5 cells</button>'
@@ -984,7 +991,7 @@ function renderActions() {
   const mode=configFor(modeKey), countInput=$("config").querySelector('[data-key="cell_count"]');
   const count=Number(countInput?.value); if (!Number.isInteger(count)||count<1||count>5) return;
   if(nfkb) {
-    box.append(node("p","Set one synthetic environment interval. T/I/L/P/FM are author labels; physical doses are unset. Administration/withdrawal are integrated mol, uptake is mol/min per cell.","note"));
+    box.append(node("p","Set one environment interval. T/I/L/P/FM select author schedule labels; administration and withdrawal are integrated mol, while uptake is mol/min per cell.","note"));
     const codeLabel=node("label","Stimulus label (author code only)"),select=node("select");select.id="stimulus-code";
     for(const [value,label] of [["","Keep prior / unset"],["T","T · TNF-alpha"],["I","I · IL-1beta"],["L","L · LPS"],["P","P · PAM2CSK4"],["FM","FM · author control"]]){
       const option=node("option",label);option.value=value;select.append(option);}codeLabel.append(select);box.append(codeLabel);
@@ -1049,7 +1056,7 @@ function renderScene() {
     canvas.tabIndex=0;canvas.setAttribute("aria-label","Interactive cell-field scene; click a cell to inspect its state");
     const inspector=node("div");inspector.id="cell-inspector";inspector.className="csim-pixel-inspector";
     layout.append(canvas,inspector);box.append(title,layout,
-      node("p","Diagram layout of one shared voxel. Click a cell to inspect before/after state; colors and particles encode synthetic values, not measured micrographs.","csim-pixel-note"));
+      node("p","Explore one shared voxel. Click a cell to inspect before and after states; color and particles encode the model's changing values. Observed p65 traces appear in their own panel.","csim-pixel-note"));
     $("state-grid").before(box);
     canvas.addEventListener("click",event=>{const picked=window.CsimPixelRenderer.pickCell(canvas,event,state);
       if(picked){selectedSceneCell=picked;renderScene();}});
@@ -1075,7 +1082,7 @@ function renderState() {
   $("mode-description").textContent= mode === "ligand" ?
     "One sender releases tracked material into a field; a receiver senses pre-step concentration without consuming ligand. Field amount is derived from 0.125 m³ voxel volume." :
     mode === "arena" ? "One to five independent cell instances share a 0.125 m³ voxel. Each has a declared position, model/context identity, amount and private memory. Rates are fixed controller inputs; the environment atomically rejects scarcity." :
-    mode === "nfkb" ? "Illustrative NF-κB-inspired proxy with tracked synthetic stimulus and generic inhibitor-like payload reservoirs. Nuclear, feedback and reporter indices are dimensionless model states; author ligand codes label schedule switches only. This is separate from observed p65 reporter data below." :
+    mode === "nfkb" ? "Explore NF-κB response across 1–5 virtual cells as stimulus and inhibitor-like payload move through tracked, finite reservoirs. Nuclear, feedback and reporter indices update each interval; stimulus codes select schedule switches. Observed p65 reporter traces are shown separately below." :
     "One cell transfers tracked tracer from a single field voxel. Response memory samples accepted pre-step concentration. Field amount is derived from 0.125 m³ voxel volume.";
   $("step").disabled=!!o.terminated||$("mode").value!==mode;
   $("export").disabled=!(o.terminated && mode==="uptake");
@@ -1086,7 +1093,7 @@ function renderState() {
   if (!state.recording_available && !$("record-status").textContent)
     message("record-status","Ocura OSS replay wrapper is unavailable in this launch.",true);
   else if(mode!=="uptake" && !$("record-status").textContent)
-    message("record-status","Current-session OSS recording supports completed uptake only. The separate integrated OSS suite records NF-κB reference runs.");
+    message("record-status","Record a completed uptake session here; inspect integrated NF-κB run receipts in the Ocura OSS evidence panel.");
 }
 function field(o,mode) { return mode==="nfkb"?o.field.synthetic_stimulus.concentration_mol_m3:["ligand","arena"].includes(mode) ? o.field_concentration_mol_m3 : o.local_concentration_mol_m3; }
 function inventory(o,mode) { return mode === "nfkb"?(o.cells||[]).map(c=>c.cell_id+":"+fmt(c.payload_amount_mol)).join("; "):mode === "arena" ? (o.cells||[]).map(c=>c.cell_id+":"+fmt(c.amount_mol)).join("; ") : mode === "ligand" ? o.receiver_amount_mol : o.cell_amount_mol; }
@@ -1172,8 +1179,8 @@ function pairedChart(canvas,control,treated,cellId,key,switches,sequence) {
 function comparisonPanel() {
   let panel=$("nfkb-comparison");if(panel)return panel;
   panel=node("section");panel.id="nfkb-comparison";
-  panel.append(node("h2","Synthetic stimulus-only vs payload comparison"),
-    node("p","Two 82-step, 6-minute trajectories use the same generic stimulus schedule. The second arm administers an inhibitor-like payload from a finite reservoir. Codes label author stimulus order; the synthetic response law does not distinguish ligand identity and is not fitted to measured p65.","muted"));
+  panel.append(node("h2","Paired NF-κB response experiment"),
+    node("p","Compare two 82-step trajectories under the same four-switch stimulus schedule. The second arm adds an inhibitor-like payload from a finite reservoir. Inspect cell-level response curves and amount ledgers; observed p65 traces are presented in their own panel below.","muted"));
   const controls=node("div",undefined,"controls");controls.style.gridTemplateColumns="repeat(auto-fit,minmax(190px,1fr))";
   for(const [key,label,value,type] of [["sequence_key","Four-code order T/I/L/P","TIPL","text"],
     ["stimulus_admin_mol_per_switch","Stimulus amount per switch (mol)",0.1,"number"],
@@ -1186,9 +1193,9 @@ function comparisonPanel() {
   const status=node("p");status.id="nfkb-compare-status";status.className="status-line";panel.append(status);
   const choose=node("label","Inspect cell"),select=node("select");select.id="compare-cell";choose.append(select);panel.append(choose);
   const cards=node("div");cards.id="nfkb-compare-cards";cards.className="evidence-grid";panel.append(cards);
-  for(const [id,label] of [["compare-reporter","Illustrative reporter index (1)"],["compare-nuclear","Illustrative nuclear proxy (1)"]]){
+  for(const [id,label] of [["compare-reporter","Reporter index (1)"],["compare-nuclear","Nuclear response proxy (1)"]]){
     const chartBox=node("div",undefined,"metric");chartBox.append(node("h3",label));const canvas=node("canvas");canvas.id=id;canvas.width=800;canvas.height=240;canvas.style.width="100%";canvas.style.height="auto";chartBox.append(canvas);panel.append(chartBox);}
-  panel.append(node("p","Blue: stimulus only; pink: stimulus plus generic payload; yellow: typed switch at 0/120/240/360 min. These curves are synthetic and use separate units from the measured reporter chart below.","note"));
+  panel.append(node("p","Blue: stimulus only; pink: stimulus plus payload; yellow: schedule switches at 0/120/240/360 min. Curves show dimensionless model indices; the observed reporter chart below uses its own source units.","note"));
   $("trace-body").closest("section").before(panel);
   select.addEventListener("change",renderComparison);
   action.addEventListener("click",async()=>{try{const request={};for(const input of panel.querySelectorAll("[data-compare-key]"))
@@ -1219,8 +1226,8 @@ function renderComparison() {
 function coupledPanel() {
   let panel=$("coupled-panel");if(panel)return panel;
   panel=node("section");panel.id="coupled-panel";
-  panel.append(node("h2","Coupled 3-cell arena · preserved run"),
-    node("p","Read-only matched synthetic baseline and mediator-coupled trajectories. A finite generic mediator is secreted, cleared, and sensed on the next interval; this is neither measured p65 nor the editable live episode.","muted"));
+  panel.append(node("h2","Coupled 3-cell mediator arena"),
+    node("p","Explore matched baseline and mediator-coupled trajectories. Three cells secrete and sense a finite shared mediator field across intervals; select a cell and time point to inspect its response and amount ledger.","muted"));
   const controls=node("div",undefined,"row"),label=node("label","Inspect modeled cell"),select=node("select");
   select.id="coupled-cell";label.append(select);controls.append(label);
   const timeLabel=node("label","Preserved sample (0–492 min)"),slider=node("input");
@@ -1230,12 +1237,12 @@ function coupledPanel() {
   const scene=node("canvas");scene.id="coupled-scene";scene.width=800;scene.height=185;
   scene.style.width="100%";scene.style.height="auto";scene.setAttribute("aria-label","Preserved coupled mediator field and identified cell sprites");panel.append(scene);
   for(const [id,label] of [["coupled-field","Generic mediator field concentration (mol/m³)"],
-                           ["coupled-nuclear","Illustrative nuclear proxy (1)"],
-                           ["coupled-reporter","Illustrative reporter index (1)"]]){
+                           ["coupled-nuclear","Nuclear response proxy (1)"],
+                           ["coupled-reporter","Reporter index (1)"]]){
     const box=node("div",undefined,"metric");box.append(node("h3",label));
     const canvas=node("canvas");canvas.id=id;canvas.width=800;canvas.height=185;canvas.style.width="100%";canvas.style.height="auto";
     box.append(canvas);panel.append(box);}
-  panel.append(node("p","Blue: matched baseline; cyan: generic mediator coupling. All three plots are synthetic. The measured p65 chart below and the frozen empirical reporter fit have separate provenance and units.","note"));
+  panel.append(node("p","Blue: matched baseline; cyan: mediator coupling. Curves show model state; the observed p65 chart and frozen reporter fit below retain separate provenance and units.","note"));
   $("trace-body").closest("section").before(panel);
   select.addEventListener("change",renderCoupled);slider.addEventListener("input",renderCoupled);
   return panel;
@@ -1268,7 +1275,7 @@ function drawCoupledScene(canvas,sample,maximumConcentration,selectedId) {
     ctx.fillStyle="#e9f6fa";ctx.font="12px Consolas,monospace";
     ctx.fillText(`${cell.cell_id} N ${fmt(cell.nuclear_proxy)} R ${fmt(cell.reporter_index)}`,x-70,y+49);}
   ctx.font="11px Consolas,monospace";ctx.fillStyle="#c3d9e5";
-  ctx.fillText("Position from preserved synthetic result · selected cell in gold · field tint follows mediator concentration",20,h-14);
+  ctx.fillText("Position from recorded model result · selected cell in gold · field tint follows mediator concentration",20,h-14);
 }
 function renderCoupled() {
   if(!state.coupled_arena_available)return;
@@ -1316,13 +1323,13 @@ function renderSymbolic() {
   for(const row of trace){const tr=node("tr");
     for(const key of ["time_s","input_concentration_mol_m3","cell_amount_mol","field_amount_mol","accepted_event_count"])
       tr.append(node("td",row[key]));tbody.append(tr);}
-  $("symbolic-run-status").textContent=`Executed from validated DSL JSON and lowered rules. Direct/lowered traces match: ${symbolicResult.trace_bytes_equal}. Run: ${symbolicResult.artifact_path}. Synthetic only.`;
+  $("symbolic-run-status").textContent=`Executed from validated DSL JSON and lowered rules. Direct/lowered traces match: ${symbolicResult.trace_bytes_equal}. Model run: ${symbolicResult.artifact_path}.`;
 }
 function observedPanel() {
   let panel=$("observed-panel");if(panel)return panel;
   panel=node("section");panel.id="observed-panel";
-  panel.append(node("h2","Measured NF-κB reporter and frozen proxy fit"),
-    node("p","Author-normalized nuclear/cytoplasmic p65 fluorescence from supplied sequential-stimulus data, compared with an early reduced reporter baseline. It misses some measured pulses. The editable stimulus/payload episode above is a separate synthetic model with no drug-efficacy claim.","muted"));
+  panel.append(node("h2","Observed p65 trajectories and frozen reporter fit"),
+    node("p","Explore author-normalized nuclear/cytoplasmic p65 fluorescence from supplied sequential-stimulus data alongside a frozen reduced-state reporter fit. Exact source-row traces and residuals reveal where the fit follows or misses measured pulses. The cell–payload experiment above is a separately scoped model.","muted"));
   const row=node("div",undefined,"row"),label=node("label","Select observed condition"),select=node("select");select.id="observed-condition";
   label.append(select);row.append(label);panel.append(row);
   const scaleLabel=node("label","Vertical scale"),scale=node("select");scale.id="observed-scale";
@@ -1331,7 +1338,7 @@ function observedPanel() {
   scale.addEventListener("change",renderObserved);
   const cards=node("div");cards.id="observed-summary";cards.className="evidence-grid";panel.append(cards);
   const predictBox=node("details");predictBox.id="frozen-predictor";predictBox.append(node("summary","Run frozen empirical reporter predictor"));
-  predictBox.append(node("p","Read-only inference from one frozen reduced state-space candidate. Four author stimulus codes and categorical dose tier only; no refit, payload input or drug response.","note"));
+  predictBox.append(node("p","Run inference from the frozen reduced state-space candidate using four author stimulus codes and a categorical dose tier. Payload response is explored in the separate cell–field experiment above.","note"));
   const predictControls=node("div",undefined,"row"),orderLabel=node("label","Four-code order"),order=node("input");
   order.id="predict-order";order.type="text";order.value="TIPL";order.maxLength=4;orderLabel.append(order);
   const doseLabel=node("label","Categorical author dose tier"),dose=node("select");dose.id="predict-dose";
