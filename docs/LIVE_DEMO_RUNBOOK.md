@@ -7,7 +7,19 @@ fit are separate from the illustrative payload and coupled-cell models.
 
 ## Start from the repository root
 
-In PowerShell, first check the exact preserved local inputs and ports:
+In PowerShell, launch all three views from the repository root:
+
+```powershell
+.\DEMO-HERE.ps1
+```
+
+Use `.\DEMO-HERE.ps1 -Install` on a new Windows checkout to create the local
+Python 3.12 environment and install the pinned dependencies. The script also
+accepts `-CheckOnly`, `-BoardPort`, `-PlaygroundPort`, and an optional
+`-EngineCli` path. It calls `tools/start_live_demo.py`; the direct commands below
+remain available when more control is useful.
+
+To check the exact preserved local inputs and ports without serving:
 
 ```powershell
 & .venv/Scripts/python.exe tools/start_live_demo.py --check-only
