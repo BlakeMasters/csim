@@ -6,3 +6,4 @@ build/
 dist/
 runs/
 .ocura-oss/
+.local/

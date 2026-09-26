@@ -1,5 +1,61 @@
 # Implementation and verification status
 
+## Local NF-κB live-demo checkpoint — 26 September 2026
+
+The current laptop demo is described in the [live runbook](docs/LIVE_DEMO_RUNBOOK.md).
+The local playground at `http://127.0.0.1:8766/` offers one to five identified
+synthetic cell instances, typed stimulus and finite generic-payload actions,
+pixel inspection, replay, a paired 82-step comparison, and separate panels for
+observed p65, a frozen empirical predictor, symbolic examples, proposer/learner
+iterations, and Ocura OSS evidence. The board is at `:8765`; the preserved
+30-pair campaign review is served at `:8766/campaign`. The launcher checks the
+local source and evidence before serving. Ocura OSS is required; an installed
+Ocura Engine CLI is optional and remains outside this repository.
+
+The final repository check, `python tools/run_checks.py`, ran on Windows 11,
+Python 3.13.5 and CPU. It recorded **242 tests, 241 passed, zero failures,
+zero errors and one symlink-privilege skip**, plus passing numerical, fixed
+3D transport and fresh-interpreter continuation checks in
+[`runs/checks_03ej3tf1/`](runs/checks_03ej3tf1/). Its ordered
+source/test/tool SHA-256 is
+`da785e21b2ad00f50699d50f902c45d6ab2dd895d290f1dec68331f0be174928`.
+An earlier concurrent-edit run is retained at
+[`runs/checks__3lyvtsp/`](runs/checks__3lyvtsp/) with one import-time error
+while the symbolic UI handler was being added; the final run completed after
+that source was committed. These checks are reference-kernel evidence and do
+not qualify the synthetic response against biological intervention data.
+
+The observed lane resolves 11,267 source matrix rows, 75 conditions, and 83
+six-minute reporter samples per condition. Its frozen sequence holdout compares
+a causal state-space baseline with current-only and no-change controls
+([evidence](runs/nfkb_model_20260926_02/comparison.json)); the held-out
+author-normalized reporter MAEs are 0.2990, 0.3426, and 0.3643 respectively.
+This is a sequence split, without known per-row run/chamber IDs or a fresh
+independent biological cohort. The illustrative stimulus/payload and generic
+mediator models are separate from the measured reporter and are not calibrated
+drug-response predictors.
+
+The synthetic campaign preserved 30 matched pairs across cell counts one to
+five and fixed/seeded variants, 4,920 accepted steps, per-step traces and
+amount ledgers, failure accounting, and an Ocura OSS sidecar
+([result](runs/nfkb_campaign_20260926_02/results.json),
+[OSS record](runs/nfkb_campaign_20260926_02/oss_record.json)). A separate
+finite generic-mediator arena adds next-interval cell-to-cell sensing through
+one shared voxel, pure amount-transfer `Update` proposals, full-state
+rejection and seeded checkpoint replay
+([contract](docs/COUPLED_NFKB_ARENA.md),
+[result](runs/coupled_nfkb_arena_20260926_04/results.json)). The current
+symbolic work comprises a narrow v0 concentration-switch/transfer language,
+a bounded typed response graph, and a typed episode workflow; these are not
+a unified general pathway interpreter. The proposer/learner exercise is a
+synthetic frozen-evaluation curriculum, not an RL or biological result.
+
+The `data/` and `runs/` inputs cited here are preserved on this laptop and
+ignored by Git. They must be supplied again in a fresh checkout. Earlier
+status below is historical and does not describe this live-demo checkpoint.
+
+## Historical status — 25 September 2026
+
 Research/design update, 25 September 2026: the new
 [implementation evaluation](docs/RESEARCH_IMPLEMENTATION_EVALUATION.md) and
 [cell-model RL design](docs/CELL_MODEL_RL_ENVIRONMENTS.md) audit data feasibility,
