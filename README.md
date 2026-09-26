@@ -14,6 +14,32 @@ on the local CPU. Biological calibration and validation remain future milestones
 This package is a build specification and executable reference
 foundation; its evidence does not establish a validated tumor simulator.
 
+## Demo views
+
+The local playground lets you step one to five virtual cells through a shared
+environment, change stimulus and payload delivery, and inspect each accepted
+state and its amount ledger. These screenshots show a completed local session.
+
+![Three virtual cells in a shared field with a selected cell's changing state and accepted transfer trace](docs/images/virtual-cell-interaction.jpg)
+
+*Three-cell interaction after 12 accepted intervals; the selected cell shows
+before and after nuclear, feedback, reporter, and payload values.*
+
+![Paired NF-kappa-B response with matched stimulus-only and payload schedules](docs/images/nfkb-paired-response.jpg)
+
+*Matched schedule comparison with response traces, final indices, intracellular
+payload amount, and the maximum amount-balance residual.*
+
+![Observed p65 source trajectories and a frozen reporter fit in the playground](docs/images/observed-p65-trajectories.jpg)
+
+*Observed p65 trajectories from the supplied sequential-stimulus data are
+displayed separately from the cell-payload model.*
+
+![Campaign review showing 30 matched pairs across one to five cells](docs/images/nfkb-campaign-review.jpg)
+
+*Preserved campaign review: 30 matched pairs, 60 runs, and 4,920 accepted
+steps across one to five cells.*
+
 ## Start here
 
 - **Launch the local demo:** from the repository root in PowerShell, run
